@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Gas Price Forecast — Monte Carlo Simulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0f12;
+    --surface:   #13161b;
+    --surface2:  #1c2028;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.13);
+    --text:      #e8e4da;
+    --muted:     #7a7f8a;
+    --faint:     #3a3f4a;
+    --red:       #e85c4a;
+    --blue:      #4a9edd;
+    --teal:      #2db88a;
+    --red-bg:    rgba(232,92,74,0.08);
+    --blue-bg:   rgba(74,158,221,0.08);
+    --teal-bg:   rgba(45,184,138,0.08);
+    --gold:      #c8a96e;
+    --mono:      'DM Mono', monospace;
+    --serif:     'Fraunces', Georgia, serif;
+    --sans:      'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 2rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 0.6rem;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 560px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  /* ── METRICS ROW ── */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .metric {
+    background: var(--surface);
+    padding: 1.25rem 1.5rem;
+    transition: background 0.2s;
+  }
+  .metric:hover { background: var(--surface2); }
+
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .metric-value {
+    font-family: var(--serif);
+    font-size: 1.9rem;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--faint);
+  }
+
+  /* ── CHART AREA ── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 1.25rem;
+    color: var(--text);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 12px;
+    color: var(--muted);
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-swatch {
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  .legend-divider {
+    width: 1px;
+    height: 14px;
+    background: var(--border2);
+  }
+
+  .legend-note {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--faint);
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 420px;
+  }
+
+  /* ── STATUS BAR ── */
+  #status-bar {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    min-height: 18px;
+    letter-spacing: 0.04em;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    margin-right: 6px;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+  /* ── SCENARIO CARDS ── */
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .scenario-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    transition: background 0.2s;
+  }
+  .scenario-card:hover { background: var(--surface2); }
+
+  .scenario-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .scenario-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .scenario-name {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 300;
+  }
+
+  .scenario-assumption {
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+    font-family: var(--mono);
+  }
+
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .data-row:last-child { border-bottom: none; }
+
+  .data-label { color: var(--muted); }
+
+  .data-value {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-align: right;
+  }
+
+  .milestone-header {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding: 0.7rem 0 0.3rem;
+  }
+
+  /* ── METHODOLOGY ── */
+  .methodology {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.75rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  @media(max-width:600px){ .methodology { grid-template-columns: 1fr; } }
+
+  .method-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+
+  .method-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .method-text strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--faint);
+  }
+
+  @media(max-width:640px){
+    header, main, footer { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .chart-wrap { height: 300px; }
+    h1 { font-size: 1.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Monte Carlo Simulation &nbsp;·&nbsp; 15,000 Paths &nbsp;·&nbsp; 12-Month Horizon</p>
+  <h1>U.S. Gas Price <em>Forecast</em></h1>
+  <p class="subtitle">Three geopolitical scenarios modeled via Ornstein-Uhlenbeck mean-reverting process, seeded from today's national average. 95% confidence intervals shown.</p>
+</header>
+
+<main>
+
+  <div class="metrics" id="metrics-row">
+    <div class="metric">
+      <div class="metric-label">National avg today</div>
+      <div class="metric-value">$3.91</div>
+      <div class="metric-sub">+$0.43 since early Mar 2026</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">WTI crude oil</div>
+      <div class="metric-value">~$117</div>
+      <div class="metric-sub">Per barrel — Hormuz risk premium</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Simulation paths</div>
+      <div class="metric-value" id="np-display">—</div>
+      <div class="metric-sub">5,000 per scenario × 3</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Confidence interval</div>
+      <div class="metric-value">95%</div>
+      <div class="metric-sub">2.5th – 97.5th percentile</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">12-Month Price Projection</div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span>Escalation</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--blue)"></span>Base case</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--teal)"></span>De-escalation</div>
+        <div class="legend-divider"></div>
+        <span class="legend-note">Bands = 95% CI &nbsp;|&nbsp; Dashed = 5th/95th pct</span>
+      </div>
+    </div>
+    <div id="status-bar"><span class="status-dot"></span>Running simulations…</div>
+    <div class="chart-wrap">
+      <canvas id="gasChart"></canvas>
+    </div>
+  </div>
+
+  <div class="scenario-grid" id="scenario-grid">
+    <div class="scenario-card" style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2.5rem;color:var(--faint);font-family:var(--mono);font-size:12px;">Computing scenario summaries…</div>
+  </div>
+
+  <div class="methodology">
+    <div>
+      <div class="method-title">Model</div>
+      <p class="method-text">
+        Prices follow an <strong>Ornstein-Uhlenbeck</strong> (mean-reverting log-normal) process:
+        <br><br>
+        <strong>d(ln P) = κ(μ − ln P)dt + σ dW</strong>
+        <br><br>
+        where <strong>κ</strong> is the reversion speed, <strong>μ</strong> the long-run mean, and <strong>σ</strong> the daily volatility. The log-normal formulation prevents negative prices while capturing the asymmetric distribution of fuel costs.
+      </p>
+    </div>
+    <div>
+      <div class="method-title">Scenario parameters</div>
+      <p class="method-text">
+        <strong>Escalation</strong> — Hormuz closure persists, crude stays elevated. Long-run pull toward ~$4.90, slow reversion (κ = 0.0035), higher volatility (σ = 0.025).<br><br>
+        <strong>Base case</strong> — Partial normalization. Pull toward ~$3.72, moderate reversion (κ = 0.0055).<br><br>
+        <strong>De-escalation</strong> — Ceasefire, crude retreats. Pull toward ~$3.05, fast reversion (κ = 0.0095), lower volatility (σ = 0.017).
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Generated March 2026 &nbsp;·&nbsp; For illustrative purposes only &nbsp;·&nbsp; Not financial advice</span>
+  <span>Data: AAA / EIA &nbsp;·&nbsp; Model: O-U log-normal &nbsp;·&nbsp; 15,000 Monte Carlo paths</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function(){
+
+function bm(){
+  let u=0,v=0;
+  while(!u)u=Math.random();
+  while(!v)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function runMC(s0,mu,k,sig,days,n){
+  const lmu=Math.log(mu);
+  const snapDays=[];
+  for(let d=0;d<=days;d+=Math.round(days/24))snapDays.push(d);
+  if(snapDays[snapDays.length-1]!==days)snapDays.push(days);
+  const snapSet=new Set(snapDays);
+  const out=Array.from({length:snapDays.length},()=>[]);
+  for(let p=0;p<n;p++){
+    let lp=Math.log(s0),si=0;
+    out[si].push(s0);si++;
+    for(let d=1;d<=days;d++){
+      lp=lp+k*(lmu-lp)+sig*bm();
+      if(snapSet.has(d)){out[si].push(Math.exp(lp));si++;}
+    }
+  }
+  return{snaps:snapDays,data:out};
+}
+
+function pct(arr,p){
+  const s=arr.slice().sort((a,b)=>a-b);
+  const idx=(p/100)*(s.length-1);
+  const lo=Math.floor(idx),hi=Math.ceil(idx);
+  return s[lo]+(s[hi]-s[lo])*(idx-lo);
+}
+
+function summarize(data){
+  return data.map(v=>({
+    med:pct(v,50),lo:pct(v,2.5),hi:pct(v,97.5),
+    p5:pct(v,5),p95:pct(v,95)
+  }));
+}
+
+const START=3.91, NP=5000, DAYS=365;
+const SC=[
+  {key:'esc', name:'Escalation',    assumption:'Hormuz closed, crude stays high',mu:4.90,k:0.0035,sig:0.025,col:'#e85c4a',fill:'rgba(232,92,74,0.10)',bg:'var(--red-bg)'},
+  {key:'base',name:'Base case',     assumption:'Partial normalization over time', mu:3.72,k:0.0055,sig:0.020,col:'#4a9edd',fill:'rgba(74,158,221,0.10)',bg:'var(--blue-bg)'},
+  {key:'de',  name:'De-escalation', assumption:'Ceasefire, crude retreats',       mu:3.05,k:0.0095,sig:0.017,col:'#2db88a',fill:'rgba(45,184,138,0.10)',bg:'var(--teal-bg)'},
+];
+
+// Run in a rAF so the page paints the "running" status first
+requestAnimationFrame(()=>{
+  const ST={};
+  SC.forEach(s=>{
+    const r=runMC(START,s.mu,s.k,s.sig,DAYS,NP);
+    ST[s.key]={snaps:r.snaps,stats:summarize(r.data)};
+  });
+
+  document.getElementById('np-display').textContent='15,000';
+
+  const snaps=ST[SC[0].key].snaps;
+
+  let yMin=Infinity,yMax=-Infinity;
+  SC.forEach(s=>{
+    ST[s.key].stats.forEach(p=>{
+      if(p.lo<yMin)yMin=p.lo;
+      if(p.hi>yMax)yMax=p.hi;
+    });
+  });
+  yMin=Math.floor((yMin*0.97)*4)/4;
+  yMax=Math.ceil((yMax*1.03)*4)/4;
+
+  const seen=new Set();
+  const ULABELS=snaps.map(d=>{
+    if(d===0)return'Today';
+    const m=Math.round(d/30.4);
+    let lbl=`Mo ${m}`;
+    while(seen.has(lbl))lbl=lbl+' ';
+    seen.add(lbl);
+    return lbl;
+  });
+
+  const datasets=[];
+  SC.forEach(s=>{
+    const st=ST[s.key].stats;
+    datasets.push({label:`${s.name}_hi`,data:st.map(x=>+x.hi.toFixed(3)),borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:0.4,fill:{target:'+1',above:s.fill,below:s.fill}});
+    datasets.push({label:`${s.name}_lo`,data:st.map(x=>+x.lo.toFixed(3)),borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:0.4,fill:false});
+    datasets.push({label:`${s.name}_p95`,data:st.map(x=>+x.p95.toFixed(3)),borderColor:s.col,backgroundColor:'transparent',borderDash:[3,4],borderWidth:1,pointRadius:0,tension:0.4,fill:false});
+    datasets.push({label:`${s.name}_p5`,data:st.map(x=>+x.p5.toFixed(3)),borderColor:s.col,backgroundColor:'transparent',borderDash:[3,4],borderWidth:1,pointRadius:0,tension:0.4,fill:false});
+    datasets.push({label:s.name,data:st.map(x=>+x.med.toFixed(3)),borderColor:s.col,backgroundColor:s.col,pointRadius:2,pointHoverRadius:5,borderWidth:2.5,tension:0.4,fill:false});
+  });
+
+  new Chart(document.getElementById('gasChart'),{
+    type:'line',
+    data:{labels:ULABELS,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1c2028',
+          borderColor:'rgba(255,255,255,0.1)',
+          borderWidth:1,
+          titleColor:'#c8a96e',
+          bodyColor:'#7a7f8a',
+          titleFont:{family:"'DM Mono', monospace",size:11},
+          bodyFont:{family:"'DM Mono', monospace",size:11},
+          padding:12,
+          filter:item=>!item.dataset.label.includes('_'),
+          callbacks:{
+            title:items=>{
+              const idx=items[0].dataIndex;
+              const d=snaps[idx];
+              return d===0?'TODAY':`DAY ${d}  ·  MO ${Math.round(d/30.4)}`;
+            },
+            label:item=>{
+              const s=SC.find(sc=>sc.name===item.dataset.label);
+              if(!s)return null;
+              const st=ST[s.key].stats[item.dataIndex];
+              return`  ${s.name}: $${(+item.raw).toFixed(2)}  |  95% CI $${st.lo.toFixed(2)}–$${st.hi.toFixed(2)}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{color:'#3a3f4a',font:{family:"'DM Mono', monospace",size:10},maxRotation:0,autoSkip:true,maxTicksLimit:13}
+        },
+        y:{
+          min:yMin,max:yMax,
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{color:'#3a3f4a',font:{family:"'DM Mono', monospace",size:10},callback:v=>'$'+v.toFixed(2)}
+        }
+      }
+    }
+  });
+
+  // Update status bar
+  const sb=document.getElementById('status-bar');
+  sb.innerHTML='<span style="color:var(--teal);font-family:var(--mono);font-size:11px;letter-spacing:0.04em;">✓ 15,000 paths computed &nbsp;·&nbsp; Hover chart for details</span>';
+
+  // Scenario summary cards
+  const milestones=[
+    {idx:Math.round(snaps.length*0.25),label:'3 months'},
+    {idx:Math.round(snaps.length*0.5), label:'6 months'},
+    {idx:snaps.length-1,               label:'12 months'},
+  ];
+
+  document.getElementById('scenario-grid').innerHTML=SC.map(s=>{
+    const st=ST[s.key].stats;
+    const rows=milestones.map(m=>{
+      const p=st[m.idx];
+      return`
+        <div class="milestone-header">${m.label}</div>
+        <div class="data-row">
+          <span class="data-label">Median</span>
+          <span class="data-value" style="color:${s.col}">$${p.med.toFixed(2)}</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">95% CI</span>
+          <span class="data-value">$${p.lo.toFixed(2)} – $${p.hi.toFixed(2)}</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">5th / 95th pct</span>
+          <span class="data-value">$${p.p5.toFixed(2)} / $${p.p95.toFixed(2)}</span>
+        </div>`;
+    }).join('');
+    return`<div class="scenario-card">
+      <div class="scenario-header">
+        <span class="scenario-dot" style="background:${s.col}"></span>
+        <span class="scenario-name">${s.name}</span>
+        <span class="scenario-assumption">${s.assumption}</span>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+});
+
+})();
+</script>
+</body>
+</html>
