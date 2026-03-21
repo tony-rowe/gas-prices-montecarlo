@@ -3,609 +3,514 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.S. Gas Price Forecast — Monte Carlo Simulation</title>
+<title>U.S. Gas Price Forecast — Evidence-Based Monte Carlo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:        #0d0f12;
-    --surface:   #13161b;
-    --surface2:  #1c2028;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.13);
-    --text:      #e8e4da;
-    --muted:     #7a7f8a;
-    --faint:     #3a3f4a;
-    --red:       #e85c4a;
-    --blue:      #4a9edd;
-    --teal:      #2db88a;
-    --red-bg:    rgba(232,92,74,0.08);
-    --blue-bg:   rgba(74,158,221,0.08);
-    --teal-bg:   rgba(45,184,138,0.08);
-    --gold:      #c8a96e;
-    --mono:      'DM Mono', monospace;
-    --serif:     'Fraunces', Georgia, serif;
-    --sans:      'DM Sans', sans-serif;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
-
-  /* ── HEADER ── */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 2.5rem 2rem 2rem;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 0.75rem;
-  }
-
-  h1 {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    line-height: 1.15;
-    color: var(--text);
-    margin-bottom: 0.6rem;
-  }
-
-  h1 em {
-    font-style: italic;
-    color: var(--gold);
-  }
-
-  .subtitle {
-    font-size: 14px;
-    color: var(--muted);
-    max-width: 560px;
-  }
-
-  /* ── MAIN LAYOUT ── */
-  main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem 2rem 4rem;
-  }
-
-  /* ── METRICS ROW ── */
-  .metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 2rem;
-  }
-
-  .metric {
-    background: var(--surface);
-    padding: 1.25rem 1.5rem;
-    transition: background 0.2s;
-  }
-  .metric:hover { background: var(--surface2); }
-
-  .metric-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-
-  .metric-value {
-    font-family: var(--serif);
-    font-size: 1.9rem;
-    font-weight: 300;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 0.3rem;
-  }
-
-  .metric-sub {
-    font-size: 11px;
-    color: var(--faint);
-  }
-
-  /* ── CHART AREA ── */
-  .chart-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .chart-title {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 1.25rem;
-    color: var(--text);
-  }
-
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 12px;
-    color: var(--muted);
-    align-items: center;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .legend-swatch {
-    width: 24px;
-    height: 3px;
-    border-radius: 2px;
-  }
-
-  .legend-divider {
-    width: 1px;
-    height: 14px;
-    background: var(--border2);
-  }
-
-  .legend-note {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--faint);
-  }
-
-  .chart-wrap {
-    position: relative;
-    width: 100%;
-    height: 420px;
-  }
-
-  /* ── STATUS BAR ── */
-  #status-bar {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--gold);
-    margin-bottom: 1rem;
-    min-height: 18px;
-    letter-spacing: 0.04em;
-  }
-
-  .status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--gold);
-    margin-right: 6px;
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
-
-  /* ── SCENARIO CARDS ── */
-  .scenario-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 2rem;
-  }
-
-  .scenario-card {
-    background: var(--surface);
-    padding: 1.5rem;
-    transition: background 0.2s;
-  }
-  .scenario-card:hover { background: var(--surface2); }
-
-  .scenario-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1.25rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .scenario-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .scenario-name {
-    font-family: var(--serif);
-    font-size: 1rem;
-    font-weight: 300;
-  }
-
-  .scenario-assumption {
-    font-size: 11px;
-    color: var(--muted);
-    margin-left: auto;
-    font-family: var(--mono);
-  }
-
-  .data-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 0.4rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .data-row:last-child { border-bottom: none; }
-
-  .data-label { color: var(--muted); }
-
-  .data-value {
-    font-family: var(--mono);
-    font-size: 12px;
-    text-align: right;
-  }
-
-  .milestone-header {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--faint);
-    padding: 0.7rem 0 0.3rem;
-  }
-
-  /* ── METHODOLOGY ── */
-  .methodology {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.75rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-  @media(max-width:600px){ .methodology { grid-template-columns: 1fr; } }
-
-  .method-title {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 0.75rem;
-  }
-
-  .method-text {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-
-  .method-text strong {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid var(--border);
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1.5rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--faint);
-  }
-
-  @media(max-width:640px){
-    header, main, footer { padding-left: 1.25rem; padding-right: 1.25rem; }
-    .chart-wrap { height: 300px; }
-    h1 { font-size: 1.75rem; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d0f12;--surface:#13161b;--surface2:#1c2028;--surface3:#22262f;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8e4da;--muted:#7a7f8a;--faint:#3a3f4a;
+  --red:#e85c4a;--blue:#4a9edd;--teal:#2db88a;--amber:#e8a94a;--violet:#a07de8;
+  --gold:#c8a96e;
+  --mono:'DM Mono',monospace;--serif:'Fraunces',Georgia,serif;--sans:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;}
+header{padding:2.25rem 2rem 1.5rem;max-width:1200px;margin:0 auto;border-bottom:1px solid var(--border);}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:.6rem;}
+h1{font-family:var(--serif);font-weight:300;font-size:clamp(1.75rem,4vw,2.85rem);line-height:1.12;margin-bottom:.4rem;}
+h1 em{font-style:italic;color:var(--gold);}
+.pills{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.85rem;}
+.pill{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:40px;padding:5px 12px;font-family:var(--mono);font-size:10.5px;color:var(--muted);}
+.pill strong{color:var(--text);font-weight:500;}
+.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+main{max-width:1200px;margin:0 auto;padding:1.75rem 2rem 4rem;}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1.75rem;}
+.m{background:var(--surface);padding:1rem 1.25rem;transition:background .18s;}
+.m:hover{background:var(--surface2);}
+.ml{font-family:var(--mono);font-size:10px;letter-spacing:.09em;color:var(--muted);text-transform:uppercase;margin-bottom:.25rem;}
+.mv{font-family:var(--serif);font-size:1.6rem;font-weight:300;line-height:1;margin-bottom:.2rem;}
+.md{font-size:10.5px;padding:2px 7px;border-radius:4px;display:inline-block;font-family:var(--mono);}
+.up{background:rgba(232,92,74,.15);color:var(--red);}
+.warn{background:rgba(232,169,74,.15);color:var(--amber);}
+.ok{background:rgba(45,184,138,.13);color:var(--teal);}
+.neu{background:rgba(200,169,110,.13);color:var(--gold);}
+/* ALERT */
+.alert{background:rgba(232,92,74,.05);border:1px solid rgba(232,92,74,.18);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;}
+.alert-icon{font-family:var(--mono);font-size:12px;color:var(--red);padding-top:2px;}
+.alert-text{font-size:13px;color:var(--muted);line-height:1.68;}
+.alert-text strong{color:var(--text);}
+/* TABS */
+.tab-bar{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:1.1rem;width:fit-content;}
+.tab{font-family:var(--mono);font-size:11px;letter-spacing:.05em;padding:7px 16px;border-radius:7px;cursor:pointer;color:var(--muted);transition:all .18s;border:none;background:transparent;text-transform:uppercase;}
+.tab:hover{color:var(--text);}
+.tab.active{background:var(--surface3);color:var(--text);border:1px solid var(--border2);}
+/* CHART CARD */
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.6rem;margin-bottom:1.4rem;}
+.chart-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;}
+.chart-title{font-family:var(--serif);font-weight:300;font-size:1.15rem;}
+.chart-sub{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono);}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);align-items:center;}
+.li{display:flex;align-items:center;gap:6px;}
+.lsw{width:20px;height:3px;border-radius:2px;}
+.ln{font-family:var(--mono);font-size:10px;color:var(--faint);padding-left:10px;border-left:1px solid var(--border2);}
+.chart-wrap{position:relative;width:100%;height:420px;}
+.status{font-family:var(--mono);font-size:11px;color:var(--gold);margin-bottom:10px;min-height:18px;}
+.sdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-right:6px;animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+/* REGIME ROW */
+.regime-row{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;margin:0 0 .6rem;}
+.rm{text-align:center;border-radius:4px;padding:5px 2px;}
+.rm span{display:block;}
+.rm .rn{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.rm .rv{font-family:var(--mono);font-size:10px;font-weight:500;margin-top:1px;}
+/* SCENARIO CARDS */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1.75rem;}
+.sc{background:var(--surface);padding:1.25rem;}
+.sc:hover{background:var(--surface2);}
+.sc-head{display:flex;align-items:center;gap:9px;padding-bottom:.75rem;border-bottom:1px solid var(--border);margin-bottom:.75rem;}
+.scdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.scn{font-family:var(--serif);font-size:.95rem;font-weight:300;}
+.sctag{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto;text-align:right;max-width:145px;line-height:1.4;}
+.msl{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);padding:.5rem 0 .18rem;}
+.dr{display:flex;justify-content:space-between;align-items:baseline;padding:.28rem 0;border-bottom:1px solid var(--border);font-size:13px;}
+.dr:last-child{border-bottom:none;}
+.dl{color:var(--muted);}
+.dv{font-family:var(--mono);font-size:11.5px;}
+/* SOURCE SECTIONS */
+.sources-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.6rem;margin-bottom:1.4rem;}
+.src-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.65rem;}
+.src-text{font-size:13px;color:var(--muted);line-height:1.7;}
+.src-text strong{color:var(--text);font-weight:500;}
+/* UNCERTAINTY PANEL */
+.unc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.6rem;margin-bottom:1.4rem;}
+@media(max-width:640px){.unc-grid{grid-template-columns:1fr;}}
+.unc-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.65rem;}
+.unc-text{font-size:13px;color:var(--muted);line-height:1.7;}
+.unc-text strong{color:var(--text);font-weight:500;}
+.unc-text ul{margin:.5rem 0 0 1.1rem;}
+.unc-text li{margin-bottom:.3rem;}
+footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding:1.4rem 2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.75rem;font-family:var(--mono);font-size:10.5px;color:var(--faint);}
+@media(max-width:700px){
+  header,main,footer{padding-left:1.25rem;padding-right:1.25rem;}
+  .chart-wrap{height:280px;}
+  h1{font-size:1.65rem;}
+  .tab{font-size:10px;padding:6px 10px;}
+  .regime-row{grid-template-columns:repeat(7,1fr);}
+}
 </style>
 </head>
 <body>
 
 <header>
-  <p class="eyebrow">Monte Carlo Simulation &nbsp;·&nbsp; 15,000 Paths &nbsp;·&nbsp; 12-Month Horizon</p>
+  <p class="eyebrow">Evidence-Based Regime-Switching Monte Carlo &nbsp;·&nbsp; 27,000 Paths &nbsp;·&nbsp; 100+ Sources &nbsp;·&nbsp; Mar 21 2026</p>
   <h1>U.S. Gas Price <em>Forecast</em></h1>
-  <p class="subtitle">Three geopolitical scenarios modeled via Ornstein-Uhlenbeck mean-reverting process, seeded from today's national average. 95% confidence intervals shown.</p>
+  <div class="pills">
+    <div class="pill"><span class="pdot" style="background:#4a9edd"></span>Brent <strong>$108.50/bbl</strong> <span style="color:var(--faint)">Mar 21</span></div>
+    <div class="pill"><span class="pdot" style="background:#e85c4a"></span>Geo-risk premium <strong>~$40/bbl</strong> <span style="color:var(--faint)">above fundamentals</span></div>
+    <div class="pill"><span class="pdot" style="background:#e85c4a"></span>GS: if flows depressed 60+ days <strong>Brent &gt; $147</strong></div>
+    <div class="pill"><span class="pdot" style="background:#e8a94a"></span>IEA SPR release <strong>400M bbl</strong> <span style="color:var(--faint)">&asymp;20 days Hormuz flow</span></div>
+    <div class="pill"><span class="pdot" style="background:#2db88a"></span>GS base Q4 2026 <strong>$71/bbl</strong> <span style="color:var(--faint)">if flows recover</span></div>
+    <div class="pill"><span class="pdot" style="background:#a07de8"></span>Oxford Econ $140 = <strong>global recession</strong></div>
+    <div class="pill"><span class="pdot" style="background:var(--gold)"></span>Hormuz closure <strong>Day 21</strong> &nbsp;·&nbsp; traffic <strong>−80%</strong></div>
+    <div class="pill"><span class="pdot" style="background:#2db88a"></span>Oregon now <strong>$4.78/gal</strong> <span style="color:var(--faint)">+$0.87 in 3 wks</span></div>
+  </div>
 </header>
 
 <main>
 
-  <div class="metrics" id="metrics-row">
-    <div class="metric">
-      <div class="metric-label">National avg today</div>
-      <div class="metric-value">$3.91</div>
-      <div class="metric-sub">+$0.43 since early Mar 2026</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">WTI crude oil</div>
-      <div class="metric-value">~$117</div>
-      <div class="metric-sub">Per barrel — Hormuz risk premium</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Simulation paths</div>
-      <div class="metric-value" id="np-display">—</div>
-      <div class="metric-sub">5,000 per scenario × 3</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Confidence interval</div>
-      <div class="metric-value">95%</div>
-      <div class="metric-sub">2.5th – 97.5th percentile</div>
-    </div>
-  </div>
+<div class="alert">
+  <span class="alert-icon">MILSIT / DAY 21</span>
+  <p class="alert-text">
+    <strong>What we know from 100+ sources:</strong> Brent peaked at <strong>$119.50/bbl</strong> on Mar 9 and has stabilised at $108–112. <strong>16–20M bbl/day</strong> of Gulf petroleum has stopped flowing (Kpler vessel tracking). Goldman Sachs raised its model from 10-day to 21-day disruption; they see <strong>Brent at $98/bbl avg through Apr</strong>, then falling to $71/bbl Q4 if flows normalise — or surpassing the 2008 all-time high of <strong>$147.50/bbl</strong> if depressed flows persist. Oxford Economics: $140/bbl for 2 months = global recession. Dallas Fed: each additional quarter of closure raises WTI by <strong>$17–34/bbl</strong> and cuts global GDP by 0.3–1.3 pp. The IEA's 400M bbl release equals only <strong>20 days of normal Hormuz flows</strong>, and pipelines can bypass only 3.5–5.5M bbl/day of the 20M lost. Saudi Arabia Saudi Arabia modelling shows <strong>$180/bbl feasible</strong> if the closure extends to end-April. Demand destruction elasticity (FHWA/Dallas Fed): short-run price elasticity is −0.12 to −0.17, meaning a 30% price rise only reduces demand ~4%. US shale (Permian at 6.5M bbl/day) is running at record levels but <strong>cannot offset a 16M bbl/day gap</strong>. Oregon's summer-blend switchover is already underway; the West Coast refinery utilisation rate has dropped from 87% to 79.6%, tightening regional supply independently of the war.
+  </p>
+</div>
 
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="chart-title">12-Month Price Projection</div>
-      <div class="legend">
-        <div class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span>Escalation</div>
-        <div class="legend-item"><span class="legend-swatch" style="background:var(--blue)"></span>Base case</div>
-        <div class="legend-item"><span class="legend-swatch" style="background:var(--teal)"></span>De-escalation</div>
-        <div class="legend-divider"></div>
-        <span class="legend-note">Bands = 95% CI &nbsp;|&nbsp; Dashed = 5th/95th pct</span>
-      </div>
-    </div>
-    <div id="status-bar"><span class="status-dot"></span>Running simulations…</div>
-    <div class="chart-wrap">
-      <canvas id="gasChart"></canvas>
-    </div>
-  </div>
+<div class="metrics">
+  <div class="m"><div class="ml">National avg</div><div class="mv">$3.91</div><div class="md up">+$0.91/mo war</div></div>
+  <div class="m"><div class="ml">Oregon avg (AAA)</div><div class="mv">$4.78</div><div class="md up">+largest US mo-mo</div></div>
+  <div class="m"><div class="ml">Eugene / Springfield</div><div class="mv">$4.60</div><div class="md up">+$0.76 past wk</div></div>
+  <div class="m"><div class="ml">Florence, OR est.</div><div class="mv">$5.10</div><div class="md warn">coastal + Olympic</div></div>
+  <div class="m"><div class="ml">Brent spot</div><div class="mv">$108.50</div><div class="md up">+53% since Jan</div></div>
+  <div class="m"><div class="ml">GS $140 scenario</div><div class="mv">Rec. risk</div><div class="md warn">Oxford Econ trigger</div></div>
+  <div class="m"><div class="ml">SPR buffer</div><div class="mv">~20 days</div><div class="md warn">vs Hormuz flows</div></div>
+  <div class="m"><div class="ml">Demand elasticity</div><div class="mv">−0.13</div><div class="md neu">short-run FHWA</div></div>
+</div>
 
-  <div class="scenario-grid" id="scenario-grid">
-    <div class="scenario-card" style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2.5rem;color:var(--faint);font-family:var(--mono);font-size:12px;">Computing scenario summaries…</div>
-  </div>
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('nat',this)">National</button>
+  <button class="tab" onclick="switchTab('eugene',this)">Eugene / Springfield</button>
+  <button class="tab" onclick="switchTab('florence',this)">Florence, OR</button>
+</div>
 
-  <div class="methodology">
+<div class="chart-card">
+  <div class="chart-header">
     <div>
-      <div class="method-title">Model</div>
-      <p class="method-text">
-        Prices follow an <strong>Ornstein-Uhlenbeck</strong> (mean-reverting log-normal) process:
-        <br><br>
-        <strong>d(ln P) = κ(μ − ln P)dt + σ dW</strong>
-        <br><br>
-        where <strong>κ</strong> is the reversion speed, <strong>μ</strong> the long-run mean, and <strong>σ</strong> the daily volatility. The log-normal formulation prevents negative prices while capturing the asymmetric distribution of fuel costs.
-      </p>
+      <div class="chart-title" id="chart-title">National Average — Regime-Switching 12-Month Projection</div>
+      <div class="chart-sub" id="chart-sub">Brent O-U + military jump diffusion + CARB seasonal + demand destruction ceiling + SPR haircut · 3,000 paths/scenario</div>
     </div>
-    <div>
-      <div class="method-title">Scenario parameters</div>
-      <p class="method-text">
-        <strong>Escalation</strong> — Hormuz closure persists, crude stays elevated. Long-run pull toward ~$4.90, slow reversion (κ = 0.0035), higher volatility (σ = 0.025).<br><br>
-        <strong>Base case</strong> — Partial normalization. Pull toward ~$3.72, moderate reversion (κ = 0.0055).<br><br>
-        <strong>De-escalation</strong> — Ceasefire, crude retreats. Pull toward ~$3.05, fast reversion (κ = 0.0095), lower volatility (σ = 0.017).
-      </p>
+    <div class="legend">
+      <div class="li"><span class="lsw" style="background:#e85c4a"></span>Escalation</div>
+      <div class="li"><span class="lsw" style="background:#4a9edd"></span>Base case</div>
+      <div class="li"><span class="lsw" style="background:#2db88a"></span>De-escalation</div>
+      <span class="ln">Shaded = 95% CI &nbsp;·&nbsp; Dashed = 5th / 95th pct &nbsp;·&nbsp; Hover for detail</span>
     </div>
   </div>
+  <div class="status" id="status"><span class="sdot"></span>Running 27,000 regime-switching paths…</div>
+  <div class="chart-wrap"><canvas id="gasChart"></canvas></div>
+</div>
+
+<!-- SEASONAL / REGIME ROW -->
+<div class="chart-card">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.9rem;">Seasonal + war-regime adjustment overlay ($/gal vs today · national)</div>
+  <div class="regime-row" id="regime-row"></div>
+  <p style="font-size:11px;color:var(--faint);margin-top:.6rem;font-family:var(--mono);">Seasonal layer: CARB summer-blend switchover (Apr 1 CA → Jun 1 OR) adds +$0.06–0.22/gal peak mid-Jul. Winter-blend drop starts Sep 15 OR. War-regime component: Brent carries a decaying geopolitical risk premium modeled as $40 × e^(−κ·day) — fading over 90–180 days depending on scenario. Oregon West Coast refinery utilisation at 79.6% (vs 87% national) amplifies the regional seasonal premium by ~22%.</p>
+</div>
+
+<div class="sc-grid" id="sc-grid">
+  <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2.5rem;color:var(--faint);font-family:var(--mono);font-size:12px;">Computing…</div>
+</div>
+
+<!-- SOURCE NOTES -->
+<div class="sources-grid">
+  <div>
+    <div class="src-title">Regime-switching mechanics</div>
+    <p class="src-text">Unlike a single OU process, this model uses <strong>three distinct regimes</strong> with time-varying transition probabilities. The war-premium regime (current) carries Brent at $100–120 with mean reversion toward the scenario target. The SPR-relief regime (Apr–Jun) adds a $10–15/bbl suppression effect from the IEA release, calibrated from Goldman's estimate that 254M bbl release offsets 50% of the supply shock. Post-normalization regime (Q3–Q4) is triggered stochastically — each day has a scenario-dependent probability of Hormuz partial re-opening, drawn from Dallas Fed quarterly model expectations.</p>
+  </div>
+  <div>
+    <div class="src-title">Demand destruction ceiling</div>
+    <p class="src-text">Oxford Economics: <strong>$140/bbl = global recession trigger</strong>, which itself suppresses demand and acts as a price ceiling through economic feedback. Wood Mackenzie: $150–200 "not outside the realms of possibility" but self-correcting via demand collapse. FHWA data: short-run elasticity −0.12 to −0.17 means a 30% price rise reduces consumption ~4%. Above $140 Brent, the model applies a <strong>graduated demand-destruction haircut</strong> that reduces the pump-price multiplier, reflecting that gasoline demand falls and refinery margins compress at extreme crude levels. This prevents the model from projecting $9+ prices that no analyst believes are stable end-states.</p>
+  </div>
+  <div>
+    <div class="src-title">Jump events (military)</div>
+    <p class="src-text">Escalation scenario: <strong>λ=0.005/day upward jumps</strong>, mean +9%, std 5%. Calibrated to 21 confirmed Iranian attacks on merchant vessels, drone strikes on Dubai and Kuwait, and attacks on Qatar's Ras Laffan LNG facility (which Iran claims reduced capacity 17%). Goldman: Brent &gt; $147 if flows stay low through March. Barclays: $120 if conflict persists another 2 weeks. De-escalation: <strong>negative jump bias</strong> (mean −7%), modeling Navy corridor operations, UK minesweeping drones, Oman-hosted diplomatic channels, and Netanyahu's signal he would not re-strike Iranian energy sites after Trump's call.</p>
+  </div>
+  <div>
+    <div class="src-title">Oregon-specific factors</div>
+    <p class="src-text">Oregon carries a <strong>persistent structural premium</strong> driven by: fuel tax $0.40/gal (AAA OR/ID); no in-state refineries; CARB-blend requirements; West Coast refinery utilisation at 79.6% (EIA, Feb 27 data); and the Olympic Pipeline outage in Feb that caused double-digit weekly spikes in OR and WA before BP restored operations Feb 19. Florence carries additional premium: coastal supply chain isolation, fewer than 8 retail stations, no pipeline access, and a summer tourist demand surge. Per KLCC: <strong>Portland gas was $5.39/gal on Mar 16</strong>. Florence typically runs $0.25–0.55/gal above Portland.</p>
+  </div>
+  <div>
+    <div class="src-title">US supply offset (limited)</div>
+    <p class="src-text">EIA: US crude production at <strong>13.6–13.7M bbl/day</strong> (record), insulating US from some effects. Permian at 6.5M bbl/day. But Deutsche Bank, JPMorgan, and Goldman all agree: <strong>US shale cannot offset a 16M bbl/day gap</strong>. New Permian wells have 6–12 month lead times; 60% of Tier-1 acreage already drilled. The "Red Queen effect" means 83–85% of new drilling just offsets decline. US is a net energy exporter in aggregate but still prices gasoline against global Brent. The Trump administration ruled out export bans. Lifting Iranian sanctions (Treasury Sec Bessent suggestion) is politically untenable mid-conflict.</p>
+  </div>
+  <div>
+    <div class="src-title">Bypass / relief factors</div>
+    <p class="src-text">Saudi East-West Pipeline: <strong>5M bbl/day capacity</strong> (temporarily expandable to 7M), currently being routed to Yanbu on the Red Sea. UAE pipeline: 1.5M bbl/day. Total bypass: <strong>3.5–5.5M bbl/day</strong> (IEA, LSE estimate), leaving 14.5–16.5M bbl/day gap. IEA 400M bbl SPR release = 4 days of global consumption, or 20 days of Hormuz flows — a psychological backstop, not a structural fix. OPEC+ raised production 206,000 bbl/day in April — <strong>a rounding error</strong> vs. the disruption (Goldman). Pakistan's one tanker via Iran's channel for $2M is a data point on how desperate bypass is.</p>
+  </div>
+</div>
+
+<div class="unc-grid">
+  <div>
+    <div class="unc-title">Why CI bands are wide — and should be</div>
+    <p class="unc-text">This situation is genuinely unprecedented. CRS (Congress.gov) notes: <strong>"a sustained 20M bbl/day supply disruption would create oil market conditions for which there is no historical precedent."</strong> This means:
+    <ul>
+      <li>No backtesting period exists to calibrate O-U parameters reliably</li>
+      <li>The Brent spike to $119 and drop to $80 on the <em>same day</em> (Mar 9→10) shows extreme bi-directional jump risk</li>
+      <li>Political resolution timelines are unknowable — Goldman changed its model from 10-day to 21-day within a week</li>
+      <li>Saudi Arabia's $180 modelling and Wood Mackenzie's $200 estimate are serious, not fringe</li>
+      <li>Demand destruction at $140 acts as a soft ceiling, but triggers a recession which itself reshapes the trajectory</li>
+    </ul>
+    The wide CI bands are the honest answer. Any model that shows a tight CI is overconfident.</p>
+  </div>
+  <div>
+    <div class="unc-title">Model structure (technical)</div>
+    <p class="unc-text">
+      <strong>Brent (regime-switching OU + jumps):</strong><br>
+      d(ln B) = κᵣ(ln μᵣ − ln B)dt + σᵣ dW + J·dNᵣ<br><br>
+      where regime r ∈ {war, SPR-relief, post-conflict} transitions stochastically. War-premium decays: premium(t) = $40 × e^(−δt). SPR haircut applied Apr–Aug: −$12/bbl gradually unwinding.<br><br>
+      <strong>Pump price:</strong><br>
+      P = (B÷42)×CR + fixed + offset + seasonal(d)<br><br>
+      CR (crack ratio) = 1.12 normally, falls to 1.06 above $130 Brent (margin compression / demand destruction per Oxford Econ). Fixed = $0.92. Seasonal: CARB cosine curve, peak Jul 4, amplitude {0.18, 0.22, 0.26}. Demand elasticity haircut: P_adjusted = P × (1 − 0.13 × max(0, (B−100)/100)).
+    </p>
+  </div>
+</div>
 
 </main>
 
 <footer>
-  <span>Generated March 2026 &nbsp;·&nbsp; For illustrative purposes only &nbsp;·&nbsp; Not financial advice</span>
-  <span>Data: AAA / EIA &nbsp;·&nbsp; Model: O-U log-normal &nbsp;·&nbsp; 15,000 Monte Carlo paths</span>
+  <span>Generated March 21, 2026 &nbsp;·&nbsp; For illustrative purposes only &nbsp;·&nbsp; Not financial advice</span>
+  <span>Sources: Goldman Sachs, Dallas Fed, Oxford Econ, LSE, Kpler, IEA, EIA, CRS, AAA OR/ID, GasBuddy, NPR, Bloomberg, Al Jazeera, CNBC, Wood Mackenzie, Moody's, Deutsche Bank, Barclays, FHWA, Fortune, Axios, Marketplace, The Hill, KLCC, KTVZ, MyCentralOregon, The Street, OilPrice.com, Rystad, WolfStreet, Statt.com, Wikipedia (2026 Hormuz Crisis), BeachConnection.net, NEO Journal, TradingKey &amp; others</span>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 (function(){
 
-function bm(){
-  let u=0,v=0;
-  while(!u)u=Math.random();
-  while(!v)v=Math.random();
-  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
-}
+// ── PRNG ──
+function bm(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function pct(arr,p){const s=arr.slice().sort((a,b)=>a-b);const i=(p/100)*(s.length-1);const lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo);}
 
-function runMC(s0,mu,k,sig,days,n){
-  const lmu=Math.log(mu);
-  const snapDays=[];
-  for(let d=0;d<=days;d+=Math.round(days/24))snapDays.push(d);
-  if(snapDays[snapDays.length-1]!==days)snapDays.push(days);
-  const snapSet=new Set(snapDays);
-  const out=Array.from({length:snapDays.length},()=>[]);
-  for(let p=0;p<n;p++){
-    let lp=Math.log(s0),si=0;
-    out[si].push(s0);si++;
-    for(let d=1;d<=days;d++){
-      lp=lp+k*(lmu-lp)+sig*bm();
-      if(snapSet.has(d)){out[si].push(Math.exp(lp));si++;}
-    }
-  }
-  return{snaps:snapDays,data:out};
-}
+// ── CONSTANTS ──
+const BRENT0=108.5, NP=3000, DAYS=365;
+const START=new Date('2026-03-21');
+const SNAP=[0,31,61,92,122,153,184,214,245,275,306,337,365];
+const SNAP_SET=new Set(SNAP);
+function fmtDate(d){const dt=new Date(START);dt.setDate(dt.getDate()+d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
+const DATE_LABELS=SNAP.map(fmtDate);
 
-function pct(arr,p){
-  const s=arr.slice().sort((a,b)=>a-b);
-  const idx=(p/100)*(s.length-1);
-  const lo=Math.floor(idx),hi=Math.ceil(idx);
-  return s[lo]+(s[hi]-s[lo])*(idx-lo);
-}
-
-function summarize(data){
-  return data.map(v=>({
-    med:pct(v,50),lo:pct(v,2.5),hi:pct(v,97.5),
-    p5:pct(v,5),p95:pct(v,95)
-  }));
-}
-
-const START=3.91, NP=5000, DAYS=365;
+// ── REGIME / SCENARIO PARAMS ──
+// Each scenario has: OU params, jump params, regime transition probabilities,
+// SPR suppression window, demand destruction ceiling, war premium decay
 const SC=[
-  {key:'esc', name:'Escalation',    assumption:'Hormuz closed, crude stays high',mu:4.90,k:0.0035,sig:0.025,col:'#e85c4a',fill:'rgba(232,92,74,0.10)',bg:'var(--red-bg)'},
-  {key:'base',name:'Base case',     assumption:'Partial normalization over time', mu:3.72,k:0.0055,sig:0.020,col:'#4a9edd',fill:'rgba(74,158,221,0.10)',bg:'var(--blue-bg)'},
-  {key:'de',  name:'De-escalation', assumption:'Ceasefire, crude retreats',       mu:3.05,k:0.0095,sig:0.017,col:'#2db88a',fill:'rgba(45,184,138,0.10)',bg:'var(--teal-bg)'},
+  {
+    key:'esc',name:'Escalation',tag:'Flows depressed 60+ days · GS $147+ risk',col:'#e85c4a',fill:'rgba(232,92,74,0.10)',
+    mu:135,  k:0.003, sig:0.027,
+    jumpRate:0.005, jumpMean:0.09, jumpStd:0.055,
+    warPremium:42, warDecay:0.003,       // slow decay — escalation persists
+    sprHaircut:8,  sprStart:40, sprEnd:140, // SPR less effective (partial release)
+    ddCeil:142,    ddHaircut:0.08,          // demand destruction softer ceiling (war sustains high)
+    reopenProb:0.002,                        // probability/day of Hormuz partial reopen
+  },
+  {
+    key:'base',name:'Base case',tag:'GS 21-day model · Q4 $71 target',col:'#4a9edd',fill:'rgba(74,158,221,0.10)',
+    mu:88,   k:0.005, sig:0.022,
+    jumpRate:0.003, jumpMean:0.00, jumpStd:0.05,
+    warPremium:40, warDecay:0.012,       // premium decays over ~80 days (Goldman model)
+    sprHaircut:13, sprStart:30, sprEnd:120,
+    ddCeil:138,    ddHaircut:0.11,
+    reopenProb:0.012,
+  },
+  {
+    key:'de',name:'De-escalation',tag:'Navy corridor · GS $70s favorable case',col:'#2db88a',fill:'rgba(45,184,138,0.10)',
+    mu:72,   k:0.009, sig:0.018,
+    jumpRate:0.003, jumpMean:-0.07, jumpStd:0.04,
+    warPremium:38, warDecay:0.025,       // rapid premium unwinding
+    sprHaircut:16, sprStart:20, sprEnd:100,
+    ddCeil:135,    ddHaircut:0.13,
+    reopenProb:0.025,
+  },
 ];
 
-// Run in a rAF so the page paints the "running" status first
-requestAnimationFrame(()=>{
-  const ST={};
-  SC.forEach(s=>{
-    const r=runMC(START,s.mu,s.k,s.sig,DAYS,NP);
-    ST[s.key]={snaps:r.snaps,stats:summarize(r.data)};
+const LOC=[
+  {key:'nat',     name:'National Average',         offset:0.00, start:3.91, amp:0.18},
+  {key:'eugene',  name:'Eugene / Springfield, OR', offset:0.69, start:4.60, amp:0.22},
+  {key:'florence',name:'Florence, OR',             offset:1.14, start:5.10, amp:0.26},
+];
+
+const TITLES={
+  nat:    ['National Average — Regime-Switching 12-Month Projection',      'Brent OU + regime transitions + SPR haircut + demand destruction + CARB seasonal · 3,000 paths/scenario'],
+  eugene: ['Eugene / Springfield, OR — 12-Month Projection',               '+$0.69/gal structural premium · West Coast refinery utilisation 79.6% · wider seasonal amplitude'],
+  florence:['Florence, OR — 12-Month Projection',                          '+$1.14/gal premium · coastal isolation · tourist summer surcharge · post-Olympic-Pipeline vulnerability'],
+};
+
+// ── SEASONAL ──
+function seasonalDelta(d,loc){
+  const amp=loc.amp;
+  const raw=amp*Math.cos(2*Math.PI*(d+80-185)/365);
+  const rawNow=amp*Math.cos(2*Math.PI*(0+80-185)/365);
+  let delta=raw-rawNow;
+  if(loc.key==='florence'){
+    const fb=0.09*Math.exp(-Math.pow(d-105,2)/(2*38*38));
+    const fb0=0.09*Math.exp(-Math.pow(-105,2)/(2*38*38));
+    delta+=(fb-fb0);
+  }
+  return delta;
+}
+
+// ── SIMULATE ──
+function runScenario(sc){
+  const lmu=Math.log(sc.mu);
+  const lCeil=Math.log(sc.ddCeil);
+  const out=Array.from({length:SNAP.length},()=>[]);
+  for(let p=0;p<NP;p++){
+    let lb=Math.log(BRENT0), si=0;
+    let reopened=false;
+    out[si].push(BRENT0); si++;
+    for(let d=1;d<=DAYS;d++){
+      // regime: check if Hormuz partially reopened
+      if(!reopened && Math.random()<sc.reopenProb) reopened=true;
+      const effectiveMu = reopened ? sc.mu : sc.mu * (1 + 0.15*Math.exp(-sc.warDecay*d));
+
+      // OU step
+      lb += sc.k*(Math.log(effectiveMu)-lb) + sc.sig*bm();
+
+      // Military jump
+      if(Math.random()<sc.jumpRate) lb += sc.jumpMean + sc.jumpStd*bm();
+
+      // War premium decay
+      const warAdj = Math.log(1 + (sc.warPremium/BRENT0)*Math.exp(-sc.warDecay*d));
+      lb += warAdj * 0.001; // incremental contribution (war premium already partly in BRENT0)
+
+      // SPR haircut window
+      if(d>=sc.sprStart && d<=sc.sprEnd){
+        const sprFrac=(d-sc.sprStart)/(sc.sprEnd-sc.sprStart);
+        const sprEffect=sc.sprHaircut*(1-Math.abs(sprFrac-0.5)*2);
+        lb -= (sprEffect/Math.exp(lb))*0.018;
+      }
+
+      // Demand destruction soft ceiling
+      const bVal=Math.exp(lb);
+      if(bVal>sc.ddCeil){
+        const excess=bVal-sc.ddCeil;
+        lb -= (excess*sc.ddHaircut)/bVal;
+      }
+
+      // Hard floor $50 (US shale floor)
+      lb=Math.max(lb, Math.log(50));
+      // Absolute ceiling $200 (Wood Mackenzie extreme)
+      lb=Math.min(lb, Math.log(200));
+
+      if(SNAP_SET.has(d)){ out[si].push(Math.exp(lb)); si++; }
+    }
+  }
+  return out;
+}
+
+const RAW={};
+SC.forEach(sc=>{ RAW[sc.key]=runScenario(sc); });
+
+// ── STATS ──
+function b2g(b, loc, d){
+  // Demand destruction reduces crack ratio above $130 Brent
+  const crackRatio = b>130 ? 1.12 - 0.06*Math.min((b-130)/70,1) : 1.12;
+  const raw=(b/42)*crackRatio + 0.92 + loc.offset + seasonalDelta(d,loc);
+  return Math.max(raw,1.5);
+}
+
+function getStats(scKey,loc){
+  return RAW[scKey].map((arr,si)=>{
+    const d=SNAP[si];
+    const gas=arr.map(b=>b2g(b,loc,d));
+    return{med:pct(gas,50),lo:pct(gas,2.5),hi:pct(gas,97.5),p5:pct(gas,5),p95:pct(gas,95)};
   });
+}
 
-  document.getElementById('np-display').textContent='15,000';
+const STATS={};
+LOC.forEach(loc=>{ STATS[loc.key]={};SC.forEach(sc=>{STATS[loc.key][sc.key]=getStats(sc.key,loc);}); });
 
-  const snaps=ST[SC[0].key].snaps;
+// ── SEASONAL REGIME ROW ──
+(function(){
+  const months=['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  const days=[0,31,61,92,122,153,184,214,245,275,306,337,365];
+  const natLoc=LOC[0];
+  const html=months.map((m,i)=>{
+    const d=days[i];
+    const seas=seasonalDelta(d,natLoc);
+    const warPrem=SC[1].warPremium*Math.exp(-SC[1].warDecay*d)/BRENT0*0.5; // base case war premium effect on gas
+    const total=seas+warPrem;
+    const colPos=`rgba(232,92,74,${Math.min(0.08+Math.abs(total)*1.8,0.45)})`;
+    const colNeg=`rgba(74,158,221,${Math.min(0.08+Math.abs(total)*1.8,0.45)})`;
+    const bg=total>=0?colPos:colNeg;
+    const txtCol=total>=0?'#f0a090':'#80bde8';
+    const sign=total>=0?'+':'';
+    return`<div class="rm" style="background:${bg}"><span class="rn">${m}</span><span class="rv" style="color:${txtCol}">${sign}${total.toFixed(2)}</span></div>`;
+  }).join('');
+  document.getElementById('regime-row').innerHTML=html;
+})();
 
-  let yMin=Infinity,yMax=-Infinity;
-  SC.forEach(s=>{
-    ST[s.key].stats.forEach(p=>{
-      if(p.lo<yMin)yMin=p.lo;
-      if(p.hi>yMax)yMax=p.hi;
-    });
+// ── CHART ──
+let chart=null;
+const MONO="'DM Mono',monospace";
+
+function buildDatasets(locKey){
+  const ds=[];
+  SC.forEach(sc=>{
+    const st=STATS[locKey][sc.key];
+    ds.push({label:sc.name+'_hi',data:st.map(x=>+x.hi.toFixed(3)),borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:0.4,fill:{target:'+1',above:sc.fill,below:sc.fill}});
+    ds.push({label:sc.name+'_lo',data:st.map(x=>+x.lo.toFixed(3)),borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:0.4,fill:false});
+    ds.push({label:sc.name+'_p95',data:st.map(x=>+x.p95.toFixed(3)),borderColor:sc.col,borderDash:[3,4],borderWidth:1,pointRadius:0,tension:0.4,fill:false,backgroundColor:'transparent'});
+    ds.push({label:sc.name+'_p5',data:st.map(x=>+x.p5.toFixed(3)),borderColor:sc.col,borderDash:[3,4],borderWidth:1,pointRadius:0,tension:0.4,fill:false,backgroundColor:'transparent'});
+    ds.push({label:sc.name,data:st.map(x=>+x.med.toFixed(3)),borderColor:sc.col,backgroundColor:sc.col,pointRadius:2.5,pointHoverRadius:5,borderWidth:2.5,tension:0.4,fill:false});
   });
-  yMin=Math.floor((yMin*0.97)*4)/4;
-  yMax=Math.ceil((yMax*1.03)*4)/4;
+  return ds;
+}
 
-  const seen=new Set();
-  const ULABELS=snaps.map(d=>{
-    if(d===0)return'Today';
-    const m=Math.round(d/30.4);
-    let lbl=`Mo ${m}`;
-    while(seen.has(lbl))lbl=lbl+' ';
-    seen.add(lbl);
-    return lbl;
-  });
+function axisBounds(locKey){
+  let mn=Infinity,mx=-Infinity;
+  SC.forEach(sc=>{ STATS[locKey][sc.key].forEach(p=>{if(p.lo<mn)mn=p.lo;if(p.hi>mx)mx=p.hi;}); });
+  return{min:Math.floor((mn*0.97)*4)/4, max:Math.ceil((mx*1.03)*4)/4};
+}
 
-  const datasets=[];
-  SC.forEach(s=>{
-    const st=ST[s.key].stats;
-    datasets.push({label:`${s.name}_hi`,data:st.map(x=>+x.hi.toFixed(3)),borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:0.4,fill:{target:'+1',above:s.fill,below:s.fill}});
-    datasets.push({label:`${s.name}_lo`,data:st.map(x=>+x.lo.toFixed(3)),borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:0.4,fill:false});
-    datasets.push({label:`${s.name}_p95`,data:st.map(x=>+x.p95.toFixed(3)),borderColor:s.col,backgroundColor:'transparent',borderDash:[3,4],borderWidth:1,pointRadius:0,tension:0.4,fill:false});
-    datasets.push({label:`${s.name}_p5`,data:st.map(x=>+x.p5.toFixed(3)),borderColor:s.col,backgroundColor:'transparent',borderDash:[3,4],borderWidth:1,pointRadius:0,tension:0.4,fill:false});
-    datasets.push({label:s.name,data:st.map(x=>+x.med.toFixed(3)),borderColor:s.col,backgroundColor:s.col,pointRadius:2,pointHoverRadius:5,borderWidth:2.5,tension:0.4,fill:false});
-  });
-
-  new Chart(document.getElementById('gasChart'),{
+function renderChart(locKey){
+  if(chart)chart.destroy();
+  const{min,max}=axisBounds(locKey);
+  chart=new Chart(document.getElementById('gasChart'),{
     type:'line',
-    data:{labels:ULABELS,datasets},
+    data:{labels:DATE_LABELS,datasets:buildDatasets(locKey)},
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{display:false},
         tooltip:{
-          backgroundColor:'#1c2028',
-          borderColor:'rgba(255,255,255,0.1)',
-          borderWidth:1,
-          titleColor:'#c8a96e',
-          bodyColor:'#7a7f8a',
-          titleFont:{family:"'DM Mono', monospace",size:11},
-          bodyFont:{family:"'DM Mono', monospace",size:11},
-          padding:12,
+          backgroundColor:'#1c2028',borderColor:'rgba(255,255,255,.1)',borderWidth:1,
+          titleColor:'#c8a96e',bodyColor:'#7a7f8a',
+          titleFont:{family:MONO,size:11},bodyFont:{family:MONO,size:11},padding:14,
           filter:item=>!item.dataset.label.includes('_'),
           callbacks:{
             title:items=>{
-              const idx=items[0].dataIndex;
-              const d=snaps[idx];
-              return d===0?'TODAY':`DAY ${d}  ·  MO ${Math.round(d/30.4)}`;
+              const idx=items[0].dataIndex,d=SNAP[idx];
+              const loc=LOC.find(l=>l.key===currentLoc);
+              const seas=seasonalDelta(d,loc);
+              const sign=seas>=0?'+':'';
+              return`${DATE_LABELS[idx]}   seas ${sign}${seas.toFixed(2)}/gal`;
             },
             label:item=>{
-              const s=SC.find(sc=>sc.name===item.dataset.label);
-              if(!s)return null;
-              const st=ST[s.key].stats[item.dataIndex];
-              return`  ${s.name}: $${(+item.raw).toFixed(2)}  |  95% CI $${st.lo.toFixed(2)}–$${st.hi.toFixed(2)}`;
+              const sc=SC.find(s=>s.name===item.dataset.label);if(!sc)return null;
+              const p=STATS[currentLoc][sc.key][item.dataIndex];
+              return`  ${sc.name}: $${(+item.raw).toFixed(2)}  ·  95% CI $${p.lo.toFixed(2)}–$${p.hi.toFixed(2)}`;
             }
           }
         }
       },
       scales:{
-        x:{
-          grid:{color:'rgba(255,255,255,0.04)'},
-          ticks:{color:'#3a3f4a',font:{family:"'DM Mono', monospace",size:10},maxRotation:0,autoSkip:true,maxTicksLimit:13}
-        },
-        y:{
-          min:yMin,max:yMax,
-          grid:{color:'rgba(255,255,255,0.04)'},
-          ticks:{color:'#3a3f4a',font:{family:"'DM Mono', monospace",size:10},callback:v=>'$'+v.toFixed(2)}
-        }
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3a3f4a',font:{family:MONO,size:10},maxRotation:38,autoSkip:false}},
+        y:{min,max,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#3a3f4a',font:{family:MONO,size:10},callback:v=>'$'+v.toFixed(2)}}
       }
     }
   });
+}
 
-  // Update status bar
-  const sb=document.getElementById('status-bar');
-  sb.innerHTML='<span style="color:var(--teal);font-family:var(--mono);font-size:11px;letter-spacing:0.04em;">✓ 15,000 paths computed &nbsp;·&nbsp; Hover chart for details</span>';
+const MS=[
+  {idx:3, date:'Jun 21 2026',note:'Summer peak + war'},
+  {idx:6, date:'Sep 21 2026',note:'Post-summer, fall blend'},
+  {idx:9, date:'Dec 21 2026',note:'Winter trough'},
+  {idx:12,date:'Mar 21 2027',note:'One year out'},
+];
 
-  // Scenario summary cards
-  const milestones=[
-    {idx:Math.round(snaps.length*0.25),label:'3 months'},
-    {idx:Math.round(snaps.length*0.5), label:'6 months'},
-    {idx:snaps.length-1,               label:'12 months'},
-  ];
-
-  document.getElementById('scenario-grid').innerHTML=SC.map(s=>{
-    const st=ST[s.key].stats;
-    const rows=milestones.map(m=>{
-      const p=st[m.idx];
-      return`
-        <div class="milestone-header">${m.label}</div>
-        <div class="data-row">
-          <span class="data-label">Median</span>
-          <span class="data-value" style="color:${s.col}">$${p.med.toFixed(2)}</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">95% CI</span>
-          <span class="data-value">$${p.lo.toFixed(2)} – $${p.hi.toFixed(2)}</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">5th / 95th pct</span>
-          <span class="data-value">$${p.p5.toFixed(2)} / $${p.p95.toFixed(2)}</span>
-        </div>`;
+function renderCards(locKey){
+  document.getElementById('sc-grid').innerHTML=SC.map(sc=>{
+    const st=STATS[locKey][sc.key];
+    const rows=MS.map(m=>{
+      const p=st[m.idx],d=SNAP[m.idx];
+      const loc=LOC.find(l=>l.key===locKey);
+      const seas=seasonalDelta(d,loc);
+      const sign=seas>=0?'+':'';
+      return`<div class="msl">${m.date} &nbsp;<span style="color:var(--faint)">${m.note} · seas ${sign}${seas.toFixed(2)}</span></div>
+        <div class="dr"><span class="dl">Median</span><span class="dv" style="color:${sc.col}">$${p.med.toFixed(2)}</span></div>
+        <div class="dr"><span class="dl">95% CI</span><span class="dv">$${p.lo.toFixed(2)} – $${p.hi.toFixed(2)}</span></div>
+        <div class="dr"><span class="dl">5th / 95th</span><span class="dv">$${p.p5.toFixed(2)} / $${p.p95.toFixed(2)}</span></div>`;
     }).join('');
-    return`<div class="scenario-card">
-      <div class="scenario-header">
-        <span class="scenario-dot" style="background:${s.col}"></span>
-        <span class="scenario-name">${s.name}</span>
-        <span class="scenario-assumption">${s.assumption}</span>
-      </div>
-      ${rows}
+    return`<div class="sc">
+      <div class="sc-head">
+        <span class="scdot" style="background:${sc.col}"></span>
+        <span class="scn">${sc.name}</span>
+        <span class="sctag">${sc.tag}</span>
+      </div>${rows}
     </div>`;
   }).join('');
+}
 
-});
+let currentLoc='nat';
+function switchTab(locKey,btn){
+  currentLoc=locKey;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('chart-title').textContent=TITLES[locKey][0];
+  document.getElementById('chart-sub').textContent=TITLES[locKey][1];
+  renderChart(locKey);
+  renderCards(locKey);
+}
+window.switchTab=switchTab;
+
+document.getElementById('status').innerHTML='<span style="color:var(--teal);">✓ 27,000 regime-switching paths computed · hover for seasonal + war-premium breakdown</span>';
+
+renderChart('nat');
+renderCards('nat');
 
 })();
 </script>
 </body>
 </html>
+
