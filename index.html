@@ -107,7 +107,7 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
   <p class="eyebrow">Evidence-Based Regime-Switching Monte Carlo &nbsp;·&nbsp; 27,000 Paths &nbsp;·&nbsp; 100+ Sources &nbsp;·&nbsp; Apr 6 2026</p>
   <h1>U.S. Gas Price <em>Forecast</em></h1>
   <div class="pills">
-    <div class="pill"><span class="pdot" style="background:#4a9edd"></span>Brent <strong>$106.00/bbl</strong> <span style="color:var(--faint)">Apr 6</span></div>
+    <div class="pill"><span class="pdot" style="background:#4a9edd"></span>Brent <strong>$107.00/bbl</strong> <span style="color:var(--faint)">Apr 6</span></div>
     <div class="pill"><span class="pdot" style="background:#e85c4a"></span>Geo-risk premium <strong>~$33/bbl</strong> <span style="color:var(--faint)">above fundamentals</span></div>
     <div class="pill"><span class="pdot" style="background:#e85c4a"></span>GS: if flows depressed 60+ days <strong>Brent &gt; $147</strong></div>
     <div class="pill"><span class="pdot" style="background:#e8a94a"></span>IEA SPR release <strong>400M bbl</strong> <span style="color:var(--faint)">&asymp;20 days Hormuz flow</span></div>
@@ -123,7 +123,7 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
 <div class="alert">
   <span class="alert-icon">MILSIT / DAY 36</span>
   <p class="alert-text">
-    <strong>What we know from 100+ sources:</strong> Brent peaked at <strong>$119.50/bbl</strong> on Mar 9 and is currently trading at $106–108. <strong>16–20M bbl/day</strong> of Gulf petroleum has stopped flowing (Kpler vessel tracking). Goldman Sachs raised its model from 21-day to 36-day disruption; they see <strong>Brent at $98/bbl avg through May</strong>, then falling to $71/bbl Q4 if flows normalise — or surpassing the 2008 all-time high of <strong>$147.50/bbl</strong> if depressed flows persist. Oxford Economics: $140/bbl for 2 months = global recession. Dallas Fed: each additional quarter of closure raises WTI by <strong>$17–34/bbl</strong> and cuts global GDP by 0.3–1.3 pp. The IEA's 400M bbl release equals only <strong>20 days of normal Hormuz flows</strong>, and pipelines can bypass only 3.5–5.5M bbl/day of the 20M lost. Saudi Arabia Saudi Arabia modelling shows <strong>$180/bbl feasible</strong> if the closure extends to end-May. Demand destruction elasticity (FHWA/Dallas Fed): short-run price elasticity is −0.12 to −0.17, meaning a 30% price rise only reduces demand ~4%. US shale (Permian at 6.5M bbl/day) is running at record levels but <strong>cannot offset a 16M bbl/day gap</strong>. Oregon's summer-blend switchover is already underway; the West Coast refinery utilisation rate has dropped from 87% to 79.6%, tightening regional supply independently of the war.
+    <strong>What we know from 100+ sources:</strong> Brent peaked at <strong>$119.50/bbl</strong> on Mar 9 and is currently trading at $107–109. <strong>16–20M bbl/day</strong> of Gulf petroleum has stopped flowing (Kpler vessel tracking). Goldman Sachs raised its model from 21-day to 36-day disruption; they see <strong>Brent at $98/bbl avg through May</strong>, then falling to $71/bbl Q4 if flows normalise — or surpassing the 2008 all-time high of <strong>$147.50/bbl</strong> if depressed flows persist. Oxford Economics: $140/bbl for 2 months = global recession. Dallas Fed: each additional quarter of closure raises WTI by <strong>$17–34/bbl</strong> and cuts global GDP by 0.3–1.3 pp. The IEA's 400M bbl release equals only <strong>20 days of normal Hormuz flows</strong>, and pipelines can bypass only 3.5–5.5M bbl/day of the 20M lost. Saudi Arabia Saudi Arabia modelling shows <strong>$180/bbl feasible</strong> if the closure extends to end-May. Demand destruction elasticity (FHWA/Dallas Fed): short-run price elasticity is −0.12 to −0.17, meaning a 30% price rise only reduces demand ~4%. US shale (Permian at 6.5M bbl/day) is running at record levels but <strong>cannot offset a 16M bbl/day gap</strong>. Oregon's summer-blend switchover is already underway; the West Coast refinery utilisation rate has dropped from 87% to 79.6%, tightening regional supply independently of the war.
   </p>
 </div>
 
@@ -132,7 +132,7 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
   <div class="m"><div class="ml">Oregon avg (AAA)</div><div class="mv">$4.72</div><div class="md up">+largest US mo-mo</div></div>
   <div class="m"><div class="ml">Eugene / Springfield</div><div class="mv">$4.55</div><div class="md up">+$0.60 past wk</div></div>
   <div class="m"><div class="ml">Florence, OR est.</div><div class="mv">$5.05</div><div class="md warn">coastal + Olympic</div></div>
-  <div class="m"><div class="ml">Brent spot</div><div class="mv">$106.00</div><div class="md up">+49% since Jan</div></div>
+  <div class="m"><div class="ml">Brent spot</div><div class="mv">$107.00</div><div class="md up">+50% since Jan</div></div>
   <div class="m"><div class="ml">GS $140 scenario</div><div class="mv">Rec. risk</div><div class="md warn">Oxford Econ trigger</div></div>
   <div class="m"><div class="ml">SPR buffer</div><div class="mv">~20 days</div><div class="md warn">vs Hormuz flows</div></div>
   <div class="m"><div class="ml">Demand elasticity</div><div class="mv">−0.13</div><div class="md neu">short-run FHWA</div></div>
@@ -242,7 +242,7 @@ function bm(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();retu
 function pct(arr,p){const s=arr.slice().sort((a,b)=>a-b);const i=(p/100)*(s.length-1);const lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo);}
 
 // ── CONSTANTS ──
-const BRENT0=106.0, NP=3000, DAYS=365;
+const BRENT0=107.0, NP=3000, DAYS=365;
 const START=new Date('2026-04-06');
 const SNAP=[0,31,61,92,122,153,184,214,245,275,306,337,365];
 const SNAP_SET=new Set(SNAP);
@@ -255,7 +255,7 @@ const DATE_LABELS=SNAP.map(fmtDate);
 const SC=[
   {
     key:'esc',name:'Escalation',tag:'Flows depressed 60+ days · GS $147+ risk',col:'#e85c4a',fill:'rgba(232,92,74,0.10)',
-    mu:135,  k:0.003, sig:0.027,
+    mu:140,  k:0.003, sig:0.027,
     jumpRate:0.005, jumpMean:0.09, jumpStd:0.055,
     warPremium:40.0, warDecay:0.003,       // slow decay — escalation persists
     sprHaircut:8,  sprStart:40, sprEnd:140, // SPR less effective (partial release)
@@ -263,7 +263,7 @@ const SC=[
     reopenProb:0.002,                        // probability/day of Hormuz partial reopen
   },
   {
-    key:'base',name:'Base case',tag:'GS 21-day model · Q4 $71 target',col:'#4a9edd',fill:'rgba(74,158,221,0.10)',
+    key:'base',name:'Base case',tag:'GS 36-day outlook · Q4 $71 target',col:'#4a9edd',fill:'rgba(74,158,221,0.10)',
     mu:88,   k:0.005, sig:0.022,
     jumpRate:0.003, jumpMean:0.00, jumpStd:0.05,
     warPremium:33.0, warDecay:0.012,       // premium decays over ~80 days (Goldman model)
