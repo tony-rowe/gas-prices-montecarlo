@@ -231,6 +231,7 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
       d(ln B) = κᵣ(ln μᵣ − ln B)dt + σᵣ dW + J·dNᵣ<br><br>
       where regime r ∈ {war, SPR-relief, post-conflict} transitions stochastically. War-premium decays: premium(t) = $33 × e^(−δt). SPR haircut applied Apr–Aug: −$12/bbl gradually unwinding.<br><br>
       <strong>Pump price:</strong><br>
+      Current calibration note: fixed is solved from the Apr 5/6, 2026 Brent and AAA snapshot, which puts it at roughly $1.15 in the current version.<br><br>
       P = (B÷42)×CR + fixed + offset + seasonal(d)<br><br>
       CR (crack ratio) = 1.12 normally, falls to 1.06 above $130 Brent (margin compression / demand destruction per Oxford Econ). Fixed = $0.92. Seasonal: CARB cosine curve, peak Jul 4, amplitude {0.18, 0.22, 0.26}. Demand elasticity haircut: P_adjusted = P × (1 − 0.13 × max(0, (B−100)/100)).
     </p>
