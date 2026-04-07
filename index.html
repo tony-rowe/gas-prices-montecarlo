@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.S. Gas Price Forecast — Evidence-Based Monte Carlo</title>
+<title>U.S. Gas Price Forecast â€” Evidence-Based Monte Carlo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -41,6 +41,21 @@ main{max-width:1200px;margin:0 auto;padding:1.75rem 2rem 4rem;}
 .alert-icon{font-family:var(--mono);font-size:12px;color:var(--red);padding-top:2px;}
 .alert-text{font-size:13px;color:var(--muted);line-height:1.68;}
 .alert-text strong{color:var(--text);}
+.live-card{background:linear-gradient(135deg,rgba(74,158,221,.09),rgba(45,184,138,.08));border:1px solid rgba(74,158,221,.18);border-radius:12px;padding:1.2rem 1.25rem;margin-bottom:1.5rem;}
+.live-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.45rem;}
+.live-copy{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:.9rem;}
+.live-copy strong{color:var(--text);font-weight:500;}
+.live-controls{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;}
+.live-input{flex:1 1 260px;min-width:220px;background:rgba(13,15,18,.7);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:12px;padding:.8rem .9rem;}
+.live-input:focus{outline:none;border-color:rgba(74,158,221,.55);box-shadow:0 0 0 3px rgba(74,158,221,.12);}
+.live-btn{border:none;border-radius:8px;background:var(--blue);color:#f4f7fb;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:.8rem 1rem;cursor:pointer;transition:transform .16s ease,opacity .16s ease,background .16s ease;}
+.live-btn:hover{transform:translateY(-1px);opacity:.96;}
+.live-btn.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--border2);}
+.live-btn:disabled{cursor:wait;opacity:.65;transform:none;}
+.live-meta{margin-top:.8rem;font-size:12px;color:var(--muted);line-height:1.6;}
+.live-meta[data-tone="ok"]{color:var(--teal);}
+.live-meta[data-tone="error"]{color:var(--red);}
+.live-meta[data-tone="pending"]{color:var(--gold);}
 /* TABS */
 .tab-bar{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:1.1rem;width:fit-content;}
 .tab{font-family:var(--mono);font-size:11px;letter-spacing:.05em;padding:7px 16px;border-radius:7px;cursor:pointer;color:var(--muted);transition:all .18s;border:none;background:transparent;text-transform:uppercase;}
@@ -104,7 +119,7 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
 <body>
 
 <header>
-  <p class="eyebrow">Evidence-Based Regime-Switching Monte Carlo &nbsp;·&nbsp; 27,000 Paths &nbsp;·&nbsp; 100+ Sources &nbsp;·&nbsp; Apr 6 2026</p>
+  <p class="eyebrow">Evidence-Based Regime-Switching Monte Carlo &nbsp;Â·&nbsp; 27,000 Paths &nbsp;Â·&nbsp; 100+ Sources &nbsp;Â·&nbsp; Apr 6 2026</p>
   <h1>U.S. Gas Price <em>Forecast</em></h1>
   <div class="pills">
     <div class="pill"><span class="pdot" style="background:#4a9edd"></span>Brent <strong>$111.14/bbl</strong> <span style="color:var(--faint)">Apr 6</span></div>
@@ -113,7 +128,7 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
     <div class="pill"><span class="pdot" style="background:#e8a94a"></span>IEA SPR release <strong>400M bbl</strong> <span style="color:var(--faint)">&asymp;20 days Hormuz flow</span></div>
     <div class="pill"><span class="pdot" style="background:#2db88a"></span>GS base Q4 2026 <strong>$71/bbl</strong> <span style="color:var(--faint)">if flows recover</span></div>
     <div class="pill"><span class="pdot" style="background:#a07de8"></span>Oxford Econ $140 = <strong>global recession</strong></div>
-    <div class="pill"><span class="pdot" style="background:var(--gold)"></span>Hormuz closure <strong>Day 36</strong> &nbsp;·&nbsp; traffic <strong>−80%</strong></div>
+    <div class="pill"><span class="pdot" style="background:var(--gold)"></span>Hormuz closure <strong>Day 36</strong> &nbsp;Â·&nbsp; traffic <strong>âˆ’80%</strong></div>
     <div class="pill"><span class="pdot" style="background:#2db88a"></span>AAA OR avg <strong>$4.99/gal</strong> <span style="color:var(--faint)">Apr 5 snapshot</span></div>
   </div>
 </header>
@@ -122,88 +137,101 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
 
 <div class="alert">
   <span class="alert-icon">CALIBRATION / BACKTEST</span>
-  <p class="alert-text">
+  <p class="alert-text" id="calibration-note">
     <strong>Current calibration:</strong> Brent is anchored at <strong>$111.14/bbl</strong> as of Apr 6, 2026, while AAA regular averages as of <strong>Apr 5, 2026</strong> are <strong>$4.11 national</strong>, <strong>$4.99 Oregon</strong>, and <strong>$4.93 Eugene-Springfield</strong>. This revision calibrates the fixed retail component and regional offsets directly to that snapshot so the model's day-zero output matches the numbers shown above. <strong>Backtest:</strong> the Mar 21, 2026 version projected Apr 6 national medians of <strong>$3.96</strong> (escalation), <strong>$3.89</strong> (base), and <strong>$3.78</strong> (de-escalation) versus a realized <strong>$4.11</strong>, so the old center understated the move by roughly <strong>3.9% to 8.4%</strong> even though the realized print still landed inside each 95% confidence band.
   </p>
   <p class="alert-text" hidden>
-    <strong>What we know from 100+ sources:</strong> Brent peaked at <strong>$119.50/bbl</strong> on Mar 9 and is currently trading at $107–109. <strong>16–20M bbl/day</strong> of Gulf petroleum has stopped flowing (Kpler vessel tracking). Goldman Sachs raised its model from 21-day to 36-day disruption; they see <strong>Brent at $98/bbl avg through May</strong>, then falling to $71/bbl Q4 if flows normalise — or surpassing the 2008 all-time high of <strong>$147.50/bbl</strong> if depressed flows persist. Oxford Economics: $140/bbl for 2 months = global recession. Dallas Fed: each additional quarter of closure raises WTI by <strong>$17–34/bbl</strong> and cuts global GDP by 0.3–1.3 pp. The IEA's 400M bbl release equals only <strong>20 days of normal Hormuz flows</strong>, and pipelines can bypass only 3.5–5.5M bbl/day of the 20M lost. Saudi Arabia Saudi Arabia modelling shows <strong>$180/bbl feasible</strong> if the closure extends to end-May. Demand destruction elasticity (FHWA/Dallas Fed): short-run price elasticity is −0.12 to −0.17, meaning a 30% price rise only reduces demand ~4%. US shale (Permian at 6.5M bbl/day) is running at record levels but <strong>cannot offset a 16M bbl/day gap</strong>. Oregon's summer-blend switchover is already underway; the West Coast refinery utilisation rate has dropped from 87% to 79.6%, tightening regional supply independently of the war.
+    <strong>What we know from 100+ sources:</strong> Brent peaked at <strong>$119.50/bbl</strong> on Mar 9 and is currently trading at $107â€“109. <strong>16â€“20M bbl/day</strong> of Gulf petroleum has stopped flowing (Kpler vessel tracking). Goldman Sachs raised its model from 21-day to 36-day disruption; they see <strong>Brent at $98/bbl avg through May</strong>, then falling to $71/bbl Q4 if flows normalise â€” or surpassing the 2008 all-time high of <strong>$147.50/bbl</strong> if depressed flows persist. Oxford Economics: $140/bbl for 2 months = global recession. Dallas Fed: each additional quarter of closure raises WTI by <strong>$17â€“34/bbl</strong> and cuts global GDP by 0.3â€“1.3 pp. The IEA's 400M bbl release equals only <strong>20 days of normal Hormuz flows</strong>, and pipelines can bypass only 3.5â€“5.5M bbl/day of the 20M lost. Saudi Arabia Saudi Arabia modelling shows <strong>$180/bbl feasible</strong> if the closure extends to end-May. Demand destruction elasticity (FHWA/Dallas Fed): short-run price elasticity is âˆ’0.12 to âˆ’0.17, meaning a 30% price rise only reduces demand ~4%. US shale (Permian at 6.5M bbl/day) is running at record levels but <strong>cannot offset a 16M bbl/day gap</strong>. Oregon's summer-blend switchover is already underway; the West Coast refinery utilisation rate has dropped from 87% to 79.6%, tightening regional supply independently of the war.
   </p>
 </div>
 
 <div class="metrics">
-  <div class="m"><div class="ml">National avg (AAA)</div><div class="mv" id="metric-national">$4.11</div><div class="md up">Apr 5 snapshot</div></div>
-  <div class="m"><div class="ml">Oregon avg (AAA)</div><div class="mv" id="metric-oregon">$4.99</div><div class="md up">Apr 5 snapshot</div></div>
-  <div class="m"><div class="ml">Eugene / Springfield</div><div class="mv" id="metric-eugene">$4.93</div><div class="md up">Apr 5 AAA metro</div></div>
-  <div class="m"><div class="ml">Florence, OR est.</div><div class="mv" id="metric-florence">$5.42</div><div class="md warn">Eugene + coastal premium</div></div>
-  <div class="m"><div class="ml">Brent spot</div><div class="mv" id="metric-brent">$111.14</div><div class="md up">Apr 6 futures</div></div>
+  <div class="m"><div class="ml">National avg</div><div class="mv" id="metric-national">$4.11</div><div class="md up" id="metric-national-note">Apr 5 AAA snapshot</div></div>
+  <div class="m"><div class="ml">Oregon avg</div><div class="mv" id="metric-oregon">$4.99</div><div class="md up" id="metric-oregon-note">Apr 5 AAA snapshot</div></div>
+  <div class="m"><div class="ml">Eugene / Springfield</div><div class="mv" id="metric-eugene">$4.93</div><div class="md up" id="metric-eugene-note">Apr 5 AAA metro</div></div>
+  <div class="m"><div class="ml">Florence, OR est.</div><div class="mv" id="metric-florence">$5.42</div><div class="md warn" id="metric-florence-note">Eugene + coastal premium</div></div>
+  <div class="m"><div class="ml">Brent spot</div><div class="mv" id="metric-brent">$111.14</div><div class="md up" id="metric-brent-note">Apr 6 futures</div></div>
   <div class="m"><div class="ml">GS $140 scenario</div><div class="mv">Rec. risk</div><div class="md warn">Oxford Econ trigger</div></div>
   <div class="m"><div class="ml">SPR buffer</div><div class="mv">~20 days</div><div class="md warn">vs Hormuz flows</div></div>
-  <div class="m"><div class="ml">Demand elasticity</div><div class="mv">−0.13</div><div class="md neu">short-run FHWA</div></div>
+  <div class="m"><div class="ml">Demand elasticity</div><div class="mv">âˆ’0.13</div><div class="md neu">short-run FHWA</div></div>
+</div>
+
+<div class="live-card">
+  <div class="live-title">Browser-Side Live Data</div>
+  <p class="live-copy">
+    Enter an <strong>EIA API key</strong> to fetch the latest Brent and U.S. regular gasoline series directly in the browser, then recalibrate and rerun the simulation locally. Oregon, Eugene, and Florence continue to use calibrated regional spreads on top of the live national series because AAA does not expose a browser-safe API.
+  </p>
+  <div class="live-controls">
+    <input class="live-input" id="eia-api-key" type="password" placeholder="Paste EIA API key for live browser fetch" autocomplete="off">
+    <button class="live-btn" id="live-refresh" type="button">Pull Live EIA Data</button>
+    <button class="live-btn secondary" id="live-clear" type="button">Clear Saved Key</button>
+  </div>
+  <div class="live-meta" id="live-meta">No live fetch yet. The page is currently using the calibrated Apr 5/6, 2026 snapshot.</div>
 </div>
 
 <div class="tab-bar">
-  <button class="tab active" onclick="switchTab('nat',this)">National</button>
-  <button class="tab" onclick="switchTab('eugene',this)">Eugene / Springfield</button>
-  <button class="tab" onclick="switchTab('florence',this)">Florence, OR</button>
+  <button class="tab active" data-loc="nat" onclick="switchTab('nat',this)">National</button>
+  <button class="tab" data-loc="eugene" onclick="switchTab('eugene',this)">Eugene / Springfield</button>
+  <button class="tab" data-loc="florence" onclick="switchTab('florence',this)">Florence, OR</button>
 </div>
 
 <div class="chart-card">
   <div class="chart-header">
     <div>
-      <div class="chart-title" id="chart-title">National Average — Regime-Switching 12-Month Projection</div>
-      <div class="chart-sub" id="chart-sub">Brent O-U + military jump diffusion + CARB seasonal + demand destruction ceiling + SPR haircut · 3,000 paths/scenario</div>
+      <div class="chart-title" id="chart-title">National Average â€” Regime-Switching 12-Month Projection</div>
+      <div class="chart-sub" id="chart-sub">Brent O-U + military jump diffusion + CARB seasonal + demand destruction ceiling + SPR haircut Â· 3,000 paths/scenario</div>
     </div>
     <div class="legend">
       <div class="li"><span class="lsw" style="background:#e85c4a"></span>Escalation</div>
       <div class="li"><span class="lsw" style="background:#4a9edd"></span>Base case</div>
       <div class="li"><span class="lsw" style="background:#2db88a"></span>De-escalation</div>
-      <span class="ln">Shaded = 95% CI &nbsp;·&nbsp; Dashed = 5th / 95th pct &nbsp;·&nbsp; Hover for detail</span>
+      <span class="ln">Shaded = 95% CI &nbsp;Â·&nbsp; Dashed = 5th / 95th pct &nbsp;Â·&nbsp; Hover for detail</span>
     </div>
   </div>
-  <div class="status" id="status"><span class="sdot"></span>Running 27,000 regime-switching paths…</div>
+  <div class="status" id="status"><span class="sdot"></span>Running 27,000 regime-switching pathsâ€¦</div>
   <div class="chart-wrap"><canvas id="gasChart"></canvas></div>
 </div>
 
 <!-- SEASONAL / REGIME ROW -->
 <div class="chart-card">
-  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.9rem;">Seasonal + war-regime adjustment overlay ($/gal vs today · national)</div>
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.9rem;">Seasonal + war-regime adjustment overlay ($/gal vs today Â· national)</div>
   <div class="regime-row" id="regime-row"></div>
-  <p style="font-size:11px;color:var(--faint);margin-top:.6rem;font-family:var(--mono);">Seasonal layer: CARB summer-blend switchover (Apr 1 CA → Jun 1 OR) adds +$0.06–0.22/gal peak mid-Jul. Winter-blend drop starts Sep 15 OR. War-regime component: Brent carries a decaying geopolitical risk premium modeled as $33 × e^(−κ·day) — fading over 90–180 days depending on scenario. Oregon West Coast refinery utilisation at 79.6% (vs 87% national) amplifies the regional seasonal premium by ~22%.</p>
+  <p style="font-size:11px;color:var(--faint);margin-top:.6rem;font-family:var(--mono);">Seasonal layer: CARB summer-blend switchover (Apr 1 CA â†’ Jun 1 OR) adds +$0.06â€“0.22/gal peak mid-Jul. Winter-blend drop starts Sep 15 OR. War-regime component: Brent carries a decaying geopolitical risk premium modeled as $33 Ã— e^(âˆ’ÎºÂ·day) â€” fading over 90â€“180 days depending on scenario. Oregon West Coast refinery utilisation at 79.6% (vs 87% national) amplifies the regional seasonal premium by ~22%.</p>
 </div>
 
 <div class="sc-grid" id="sc-grid">
-  <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2.5rem;color:var(--faint);font-family:var(--mono);font-size:12px;">Computing…</div>
+  <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2.5rem;color:var(--faint);font-family:var(--mono);font-size:12px;">Computingâ€¦</div>
 </div>
 
 <!-- SOURCE NOTES -->
 <div class="sources-grid">
   <div>
     <div class="src-title">Current alignment</div>
-    <p class="src-text">The displayed "today" numbers now come from the same calibration inputs that anchor the simulation: <strong>Brent $111.14</strong> on Apr 6, 2026 and AAA regular averages of <strong>$4.11 national</strong>, <strong>$4.99 Oregon</strong>, and <strong>$4.93 Eugene-Springfield</strong> on Apr 5, 2026. The fixed retail term is recalibrated so day-zero model output matches the observed national average rather than drifting below it.</p>
+    <p class="src-text" id="alignment-note">The displayed "today" numbers now come from the same calibration inputs that anchor the simulation: <strong>Brent $111.14</strong> on Apr 6, 2026 and AAA regular averages of <strong>$4.11 national</strong>, <strong>$4.99 Oregon</strong>, and <strong>$4.93 Eugene-Springfield</strong> on Apr 5, 2026. The fixed retail term is recalibrated so day-zero model output matches the observed national average rather than drifting below it.</p>
   </div>
   <div>
     <div class="src-title">Regime-switching mechanics</div>
-    <p class="src-text">Unlike a single OU process, this model uses <strong>three distinct regimes</strong> with time-varying transition probabilities. The war-premium regime (current) carries Brent at $100–120 with mean reversion toward the scenario target. The SPR-relief regime (Apr–Jun) adds a $10–15/bbl suppression effect from the IEA release, calibrated from Goldman's estimate that 254M bbl release offsets 50% of the supply shock. Post-normalization regime (Q3–Q4) is triggered stochastically — each day has a scenario-dependent probability of Hormuz partial re-opening, drawn from Dallas Fed quarterly model expectations.</p>
+    <p class="src-text">Unlike a single OU process, this model uses <strong>three distinct regimes</strong> with time-varying transition probabilities. The war-premium regime (current) carries Brent at $100â€“120 with mean reversion toward the scenario target. The SPR-relief regime (Aprâ€“Jun) adds a $10â€“15/bbl suppression effect from the IEA release, calibrated from Goldman's estimate that 254M bbl release offsets 50% of the supply shock. Post-normalization regime (Q3â€“Q4) is triggered stochastically â€” each day has a scenario-dependent probability of Hormuz partial re-opening, drawn from Dallas Fed quarterly model expectations.</p>
   </div>
   <div>
     <div class="src-title">Demand destruction ceiling</div>
-    <p class="src-text">Oxford Economics: <strong>$140/bbl = global recession trigger</strong>, which itself suppresses demand and acts as a price ceiling through economic feedback. Wood Mackenzie: $150–200 "not outside the realms of possibility" but self-correcting via demand collapse. FHWA data: short-run elasticity −0.12 to −0.17 means a 30% price rise reduces consumption ~4%. Above $140 Brent, the model applies a <strong>graduated demand-destruction haircut</strong> that reduces the pump-price multiplier, reflecting that gasoline demand falls and refinery margins compress at extreme crude levels. This prevents the model from projecting $9+ prices that no analyst believes are stable end-states.</p>
+    <p class="src-text">Oxford Economics: <strong>$140/bbl = global recession trigger</strong>, which itself suppresses demand and acts as a price ceiling through economic feedback. Wood Mackenzie: $150â€“200 "not outside the realms of possibility" but self-correcting via demand collapse. FHWA data: short-run elasticity âˆ’0.12 to âˆ’0.17 means a 30% price rise reduces consumption ~4%. Above $140 Brent, the model applies a <strong>graduated demand-destruction haircut</strong> that reduces the pump-price multiplier, reflecting that gasoline demand falls and refinery margins compress at extreme crude levels. This prevents the model from projecting $9+ prices that no analyst believes are stable end-states.</p>
   </div>
   <div>
     <div class="src-title">Jump events (military)</div>
-    <p class="src-text">Escalation scenario: <strong>λ=0.005/day upward jumps</strong>, mean +9%, std 5%. Calibrated to 21 confirmed Iranian attacks on merchant vessels, drone strikes on Dubai and Kuwait, and attacks on Qatar's Ras Laffan LNG facility (which Iran claims reduced capacity 17%). Goldman: Brent &gt; $147 if flows stay low through March. Barclays: $120 if conflict persists another 2 weeks. De-escalation: <strong>negative jump bias</strong> (mean −7%), modeling Navy corridor operations, UK minesweeping drones, Oman-hosted diplomatic channels, and Netanyahu's signal he would not re-strike Iranian energy sites after Trump's call.</p>
+    <p class="src-text">Escalation scenario: <strong>Î»=0.005/day upward jumps</strong>, mean +9%, std 5%. Calibrated to 21 confirmed Iranian attacks on merchant vessels, drone strikes on Dubai and Kuwait, and attacks on Qatar's Ras Laffan LNG facility (which Iran claims reduced capacity 17%). Goldman: Brent &gt; $147 if flows stay low through March. Barclays: $120 if conflict persists another 2 weeks. De-escalation: <strong>negative jump bias</strong> (mean âˆ’7%), modeling Navy corridor operations, UK minesweeping drones, Oman-hosted diplomatic channels, and Netanyahu's signal he would not re-strike Iranian energy sites after Trump's call.</p>
   </div>
   <div>
     <div class="src-title">Oregon-specific factors</div>
-    <p class="src-text">Oregon carries a <strong>persistent structural premium</strong> driven by: fuel tax $0.40/gal (AAA OR/ID); no in-state refineries; CARB-blend requirements; West Coast refinery utilisation at 79.6% (EIA, Feb 27 data); and the Olympic Pipeline outage in Feb that caused double-digit weekly spikes in OR and WA before BP restored operations Feb 19. Florence carries additional premium: coastal supply chain isolation, fewer than 8 retail stations, no pipeline access, and a summer tourist demand surge. Per KLCC: <strong>Portland gas was $5.39/gal on Mar 16</strong>. Florence typically runs $0.25–0.55/gal above Portland.</p>
+    <p class="src-text">Oregon carries a <strong>persistent structural premium</strong> driven by: fuel tax $0.40/gal (AAA OR/ID); no in-state refineries; CARB-blend requirements; West Coast refinery utilisation at 79.6% (EIA, Feb 27 data); and the Olympic Pipeline outage in Feb that caused double-digit weekly spikes in OR and WA before BP restored operations Feb 19. Florence carries additional premium: coastal supply chain isolation, fewer than 8 retail stations, no pipeline access, and a summer tourist demand surge. Per KLCC: <strong>Portland gas was $5.39/gal on Mar 16</strong>. Florence typically runs $0.25â€“0.55/gal above Portland.</p>
   </div>
   <div>
     <div class="src-title">US supply offset (limited)</div>
-    <p class="src-text">EIA: US crude production at <strong>13.6–13.7M bbl/day</strong> (record), insulating US from some effects. Permian at 6.5M bbl/day. But Deutsche Bank, JPMorgan, and Goldman all agree: <strong>US shale cannot offset a 16M bbl/day gap</strong>. New Permian wells have 6–12 month lead times; 60% of Tier-1 acreage already drilled. The "Red Queen effect" means 83–85% of new drilling just offsets decline. US is a net energy exporter in aggregate but still prices gasoline against global Brent. The Trump administration ruled out export bans. Lifting Iranian sanctions (Treasury Sec Bessent suggestion) is politically untenable mid-conflict.</p>
+    <p class="src-text">EIA: US crude production at <strong>13.6â€“13.7M bbl/day</strong> (record), insulating US from some effects. Permian at 6.5M bbl/day. But Deutsche Bank, JPMorgan, and Goldman all agree: <strong>US shale cannot offset a 16M bbl/day gap</strong>. New Permian wells have 6â€“12 month lead times; 60% of Tier-1 acreage already drilled. The "Red Queen effect" means 83â€“85% of new drilling just offsets decline. US is a net energy exporter in aggregate but still prices gasoline against global Brent. The Trump administration ruled out export bans. Lifting Iranian sanctions (Treasury Sec Bessent suggestion) is politically untenable mid-conflict.</p>
   </div>
   <div>
     <div class="src-title">Bypass / relief factors</div>
-    <p class="src-text">Saudi East-West Pipeline: <strong>5M bbl/day capacity</strong> (temporarily expandable to 7M), currently being routed to Yanbu on the Red Sea. UAE pipeline: 1.5M bbl/day. Total bypass: <strong>3.5–5.5M bbl/day</strong> (IEA, LSE estimate), leaving 14.5–16.5M bbl/day gap. IEA 400M bbl SPR release = 4 days of global consumption, or 20 days of Hormuz flows — a psychological backstop, not a structural fix. OPEC+ raised production 206,000 bbl/day in April — <strong>a rounding error</strong> vs. the disruption (Goldman). Pakistan's one tanker via Iran's channel for $2M is a data point on how desperate bypass is.</p>
+    <p class="src-text">Saudi East-West Pipeline: <strong>5M bbl/day capacity</strong> (temporarily expandable to 7M), currently being routed to Yanbu on the Red Sea. UAE pipeline: 1.5M bbl/day. Total bypass: <strong>3.5â€“5.5M bbl/day</strong> (IEA, LSE estimate), leaving 14.5â€“16.5M bbl/day gap. IEA 400M bbl SPR release = 4 days of global consumption, or 20 days of Hormuz flows â€” a psychological backstop, not a structural fix. OPEC+ raised production 206,000 bbl/day in April â€” <strong>a rounding error</strong> vs. the disruption (Goldman). Pakistan's one tanker via Iran's channel for $2M is a data point on how desperate bypass is.</p>
   </div>
   <div>
     <div class="src-title">Recent backtest</div>
@@ -213,12 +241,12 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
 
 <div class="unc-grid">
   <div>
-    <div class="unc-title">Why CI bands are wide — and should be</div>
+    <div class="unc-title">Why CI bands are wide â€” and should be</div>
     <p class="unc-text">This situation is genuinely unprecedented. CRS (Congress.gov) notes: <strong>"a sustained 20M bbl/day supply disruption would create oil market conditions for which there is no historical precedent."</strong> This means:
     <ul>
       <li>No backtesting period exists to calibrate O-U parameters reliably</li>
-      <li>The Brent spike to $119 and drop to $80 on the <em>same day</em> (Mar 9→10) shows extreme bi-directional jump risk</li>
-      <li>Political resolution timelines are unknowable — Goldman changed its model from 10-day to 21-day within a week</li>
+      <li>The Brent spike to $119 and drop to $80 on the <em>same day</em> (Mar 9â†’10) shows extreme bi-directional jump risk</li>
+      <li>Political resolution timelines are unknowable â€” Goldman changed its model from 10-day to 21-day within a week</li>
       <li>Saudi Arabia's $180 modelling and Wood Mackenzie's $200 estimate are serious, not fringe</li>
       <li>Demand destruction at $140 acts as a soft ceiling, but triggers a recession which itself reshapes the trajectory</li>
     </ul>
@@ -228,12 +256,13 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
     <div class="unc-title">Model structure (technical)</div>
     <p class="unc-text">
       <strong>Brent (regime-switching OU + jumps):</strong><br>
-      d(ln B) = κᵣ(ln μᵣ − ln B)dt + σᵣ dW + J·dNᵣ<br><br>
-      where regime r ∈ {war, SPR-relief, post-conflict} transitions stochastically. War-premium decays: premium(t) = $33 × e^(−δt). SPR haircut applied Apr–Aug: −$12/bbl gradually unwinding.<br><br>
+      d(ln B) = Îºáµ£(ln Î¼áµ£ âˆ’ ln B)dt + Ïƒáµ£ dW + JÂ·dNáµ£<br><br>
+      where regime r âˆˆ {war, SPR-relief, post-conflict} transitions stochastically. War-premium decays: premium(t) = $33 Ã— e^(âˆ’Î´t). SPR haircut applied Aprâ€“Aug: âˆ’$12/bbl gradually unwinding.<br><br>
       <strong>Pump price:</strong><br>
-      Current calibration note: fixed is solved from the Apr 5/6, 2026 Brent and AAA snapshot, which puts it at roughly $1.15 in the current version.<br><br>
-      P = (B÷42)×CR + fixed + offset + seasonal(d)<br><br>
-      CR (crack ratio) = 1.12 normally, falls to 1.06 above $130 Brent (margin compression / demand destruction per Oxford Econ). Fixed = $0.92. Seasonal: CARB cosine curve, peak Jul 4, amplitude {0.18, 0.22, 0.26}. Demand elasticity haircut: P_adjusted = P × (1 − 0.13 × max(0, (B−100)/100)).
+      <span id="technical-calibration-note">Current calibration note: fixed is solved from the Apr 5/6, 2026 Brent and AAA snapshot, which puts it at roughly $1.15 in the current version.</span><br><br>
+      P = (B/42) x CR + fixed + offset + seasonal(d)<br><br>
+      <span id="technical-fixed-note">Fixed is recalculated from the active snapshot instead of staying at the original $0.92 constant.</span><br>
+      CR (crack ratio) = 1.12 normally, falls to 1.06 above $130 Brent (margin compression / demand destruction per Oxford Econ). Fixed = $0.92. Seasonal: CARB cosine curve, peak Jul 4, amplitude {0.18, 0.22, 0.26}. Demand elasticity haircut: P_adjusted = P Ã— (1 âˆ’ 0.13 Ã— max(0, (Bâˆ’100)/100)).
     </p>
   </div>
 </div>
@@ -241,15 +270,16 @@ footer{border-top:1px solid var(--border);max-width:1200px;margin:0 auto;padding
 </main>
 
 <footer>
-  <span>Generated April 6, 2026 &nbsp;·&nbsp; For illustrative purposes only &nbsp;·&nbsp; Not financial advice</span>
+  <span>Generated April 6, 2026 &nbsp;Â·&nbsp; For illustrative purposes only &nbsp;Â·&nbsp; Not financial advice</span>
   <span>Sources: Goldman Sachs, Dallas Fed, Oxford Econ, LSE, Kpler, IEA, EIA, CRS, AAA OR/ID, GasBuddy, NPR, Bloomberg, Al Jazeera, CNBC, Wood Mackenzie, Moody's, Deutsche Bank, Barclays, FHWA, Fortune, Axios, Marketplace, The Hill, KLCC, KTVZ, MyCentralOregon, The Street, OilPrice.com, Rystad, WolfStreet, Statt.com, Wikipedia (2026 Hormuz Crisis), BeachConnection.net, NEO Journal, TradingKey &amp; others</span>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="live-sim.js"></script>
 <script>
-(function(){
+if(false){(function(){
 
-// ── PRNG ──
+// â”€â”€ PRNG â”€â”€
 function seedFromString(str){
   let h=1779033703^str.length;
   for(let i=0;i<str.length;i++){
@@ -270,7 +300,7 @@ function mulberry32(seed){
 function bm(rng){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function pct(arr,p){const s=arr.slice().sort((a,b)=>a-b);const i=(p/100)*(s.length-1);const lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo);}
 
-// ── CONSTANTS ──
+// â”€â”€ CONSTANTS â”€â”€
 const BRENT0=111.14, NP=9000, DAYS=365;
 const START=new Date('2026-04-06');
 const SNAP=[0,31,61,92,122,153,184,214,245,275,306,337,365];
@@ -287,21 +317,21 @@ const FIXED=+(PRICE_SNAPSHOT.national-((BRENT0/42)*1.12)).toFixed(3);
 function fmtDate(d){const dt=new Date(START);dt.setDate(dt.getDate()+d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
 const DATE_LABELS=SNAP.map(fmtDate);
 
-// ── REGIME / SCENARIO PARAMS ──
+// â”€â”€ REGIME / SCENARIO PARAMS â”€â”€
 // Each scenario has: OU params, jump params, regime transition probabilities,
 // SPR suppression window, demand destruction ceiling, war premium decay
 const SC=[
   {
-    key:'esc',name:'Escalation',tag:'Flows depressed 60+ days · GS $147+ risk',col:'#e85c4a',fill:'rgba(232,92,74,0.10)',
+    key:'esc',name:'Escalation',tag:'Flows depressed 60+ days Â· GS $147+ risk',col:'#e85c4a',fill:'rgba(232,92,74,0.10)',
     mu:140,  k:0.003, sig:0.027,
     jumpRate:0.005, jumpMean:0.09, jumpStd:0.055,
-    warPremium:40.0, warDecay:0.003,       // slow decay — escalation persists
+    warPremium:40.0, warDecay:0.003,       // slow decay â€” escalation persists
     sprHaircut:8,  sprStart:40, sprEnd:140, // SPR less effective (partial release)
     ddCeil:142,    ddHaircut:0.08,          // demand destruction softer ceiling (war sustains high)
     reopenProb:0.002,                        // probability/day of Hormuz partial reopen
   },
   {
-    key:'base',name:'Base case',tag:'GS 36-day outlook · Q4 $71 target',col:'#4a9edd',fill:'rgba(74,158,221,0.10)',
+    key:'base',name:'Base case',tag:'GS 36-day outlook Â· Q4 $71 target',col:'#4a9edd',fill:'rgba(74,158,221,0.10)',
     mu:88,   k:0.005, sig:0.022,
     jumpRate:0.003, jumpMean:0.00, jumpStd:0.05,
     warPremium:33.0, warDecay:0.012,       // premium decays over ~80 days (Goldman model)
@@ -310,7 +340,7 @@ const SC=[
     reopenProb:0.012,
   },
   {
-    key:'de',name:'De-escalation',tag:'Navy corridor · GS $70s favorable case',col:'#2db88a',fill:'rgba(45,184,138,0.10)',
+    key:'de',name:'De-escalation',tag:'Navy corridor Â· GS $70s favorable case',col:'#2db88a',fill:'rgba(45,184,138,0.10)',
     mu:72,   k:0.009, sig:0.018,
     jumpRate:0.003, jumpMean:-0.07, jumpStd:0.04,
     warPremium:25.5, warDecay:0.025,       // rapid premium unwinding
@@ -327,12 +357,12 @@ const LOC=[
 ];
 
 const TITLES={
-  nat:    ['National Average — Regime-Switching 12-Month Projection',      'Brent OU + regime transitions + SPR haircut + demand destruction + CARB seasonal · 3,000 paths/scenario'],
-  eugene: ['Eugene / Springfield, OR — 12-Month Projection',               '+$0.69/gal structural premium · West Coast refinery utilisation 79.6% · wider seasonal amplitude'],
-  florence:['Florence, OR — 12-Month Projection',                          '+$1.14/gal premium · coastal isolation · tourist summer surcharge · post-Olympic-Pipeline vulnerability'],
+  nat:    ['National Average â€” Regime-Switching 12-Month Projection',      'Brent OU + regime transitions + SPR haircut + demand destruction + CARB seasonal Â· 3,000 paths/scenario'],
+  eugene: ['Eugene / Springfield, OR â€” 12-Month Projection',               '+$0.69/gal structural premium Â· West Coast refinery utilisation 79.6% Â· wider seasonal amplitude'],
+  florence:['Florence, OR â€” 12-Month Projection',                          '+$1.14/gal premium Â· coastal isolation Â· tourist summer surcharge Â· post-Olympic-Pipeline vulnerability'],
 };
 
-// ── SEASONAL ──
+// â”€â”€ SEASONAL â”€â”€
 function seasonalDelta(d,loc){
   const amp=loc.amp;
   const raw=amp*Math.cos(2*Math.PI*(d+80-185)/365);
@@ -346,7 +376,7 @@ function seasonalDelta(d,loc){
   return delta;
 }
 
-// ── SIMULATE ──
+// â”€â”€ SIMULATE â”€â”€
 function runScenario(sc){
   const rng=mulberry32(seedFromString(`scenario:${sc.key}`));
   const lmu=Math.log(sc.mu);
@@ -399,7 +429,7 @@ function runScenario(sc){
 const RAW={};
 SC.forEach(sc=>{ RAW[sc.key]=runScenario(sc); });
 
-// ── STATS ──
+// â”€â”€ STATS â”€â”€
 function b2g(b, loc, d){
   // Demand destruction reduces crack ratio above $130 Brent
   const crackRatio = b>130 ? 1.12 - 0.06*Math.min((b-130)/70,1) : 1.12;
@@ -425,11 +455,11 @@ function renderMetrics(){
   document.getElementById('metric-florence').textContent=`$${FLORENCE_CURRENT.toFixed(2)}`;
   document.getElementById('metric-brent').textContent=`$${BRENT0.toFixed(2)}`;
 }
-TITLES.nat[1]='Brent OU + regime transitions + SPR haircut + demand destruction + CARB seasonal · 9,000 seeded paths/scenario';
-TITLES.eugene[1]='+$0.82/gal calibrated premium · West Coast refinery utilisation 79.6% · wider seasonal amplitude';
-TITLES.florence[1]='+$1.31/gal premium · coastal isolation · tourist summer surcharge · post-Olympic-Pipeline vulnerability';
+TITLES.nat[1]='Brent OU + regime transitions + SPR haircut + demand destruction + CARB seasonal Â· 9,000 seeded paths/scenario';
+TITLES.eugene[1]='+$0.82/gal calibrated premium Â· West Coast refinery utilisation 79.6% Â· wider seasonal amplitude';
+TITLES.florence[1]='+$1.31/gal premium Â· coastal isolation Â· tourist summer surcharge Â· post-Olympic-Pipeline vulnerability';
 
-// ── SEASONAL REGIME ROW ──
+// â”€â”€ SEASONAL REGIME ROW â”€â”€
 (function(){
   const months=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'];
   const days=[0,31,61,92,122,153,184,214,245,275,306,337,365];
@@ -449,7 +479,7 @@ TITLES.florence[1]='+$1.31/gal premium · coastal isolation · tourist summer su
   document.getElementById('regime-row').innerHTML=html;
 })();
 
-// ── CHART ──
+// â”€â”€ CHART â”€â”€
 let chart=null;
 const MONO="'DM Mono',monospace";
 
@@ -499,7 +529,7 @@ function renderChart(locKey){
             label:item=>{
               const sc=SC.find(s=>s.name===item.dataset.label);if(!sc)return null;
               const p=STATS[currentLoc][sc.key][item.dataIndex];
-              return`  ${sc.name}: $${(+item.raw).toFixed(2)}  ·  95% CI $${p.lo.toFixed(2)}–$${p.hi.toFixed(2)}`;
+              return`  ${sc.name}: $${(+item.raw).toFixed(2)}  Â·  95% CI $${p.lo.toFixed(2)}â€“$${p.hi.toFixed(2)}`;
             }
           }
         }
@@ -527,9 +557,9 @@ function renderCards(locKey){
       const loc=LOC.find(l=>l.key===locKey);
       const seas=seasonalDelta(d,loc);
       const sign=seas>=0?'+':'';
-      return`<div class="msl">${m.date} &nbsp;<span style="color:var(--faint)">${m.note} · seas ${sign}${seas.toFixed(2)}</span></div>
+      return`<div class="msl">${m.date} &nbsp;<span style="color:var(--faint)">${m.note} Â· seas ${sign}${seas.toFixed(2)}</span></div>
         <div class="dr"><span class="dl">Median</span><span class="dv" style="color:${sc.col}">$${p.med.toFixed(2)}</span></div>
-        <div class="dr"><span class="dl">95% CI</span><span class="dv">$${p.lo.toFixed(2)} – $${p.hi.toFixed(2)}</span></div>
+        <div class="dr"><span class="dl">95% CI</span><span class="dv">$${p.lo.toFixed(2)} â€“ $${p.hi.toFixed(2)}</span></div>
         <div class="dr"><span class="dl">5th / 95th</span><span class="dv">$${p.p5.toFixed(2)} / $${p.p95.toFixed(2)}</span></div>`;
     }).join('');
     return`<div class="sc">
@@ -554,16 +584,16 @@ function switchTab(locKey,btn){
 }
 window.switchTab=switchTab;
 
-document.getElementById('status').innerHTML='<span style="color:var(--teal);">✓ 27,000 regime-switching paths computed · hover for seasonal + war-premium breakdown</span>';
+document.getElementById('status').innerHTML='<span style="color:var(--teal);">âœ“ 27,000 regime-switching paths computed Â· hover for seasonal + war-premium breakdown</span>';
 
 renderMetrics();
 renderChart('nat');
 renderCards('nat');
-document.getElementById('status').textContent='Calibrated to Apr 5/6 2026 snapshot · 27,000 seeded paths computed';
+document.getElementById('status').textContent='Calibrated to Apr 5/6 2026 snapshot Â· 27,000 seeded paths computed';
 
-document.getElementById('status').innerHTML='<span style="color:var(--teal);">âœ“ 27,000 seeded regime-switching paths computed Â· calibrated to Apr 5/6 2026 snapshot</span>';
+document.getElementById('status').innerHTML='<span style="color:var(--teal);">Ã¢Å“â€œ 27,000 seeded regime-switching paths computed Ã‚Â· calibrated to Apr 5/6 2026 snapshot</span>';
 
-})();
+})();}
 </script>
 </body>
 </html>
