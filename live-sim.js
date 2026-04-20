@@ -83,8 +83,8 @@ function renderMetrics(){
   document.getElementById('metric-florence').textContent=`$${FLORENCE_CURRENT.toFixed(2)}`;
   document.getElementById('metric-brent').textContent=`$${BRENT0.toFixed(2)}`;
   document.getElementById('metric-national-note').textContent=`${PRICE_SNAPSHOT.nationalDate} ${PRICE_SNAPSHOT.nationalSource}`;
-  document.getElementById('metric-oregon-note').textContent=liveRegional?'Live national + OR spread':'Apr 5 AAA snapshot';
-  document.getElementById('metric-eugene-note').textContent=liveRegional?'Live national + Eugene spread':'Apr 5 AAA metro';
+  document.getElementById('metric-oregon-note').textContent=liveRegional?'Live national + OR spread':'Apr 20 AAA snapshot';
+  document.getElementById('metric-eugene-note').textContent=liveRegional?'Live national + Eugene spread':'Apr 20 AAA metro';
   document.getElementById('metric-florence-note').textContent=liveRegional?'Live Eugene + coastal spread':'Eugene + coastal premium';
   document.getElementById('metric-brent-note').textContent=`${PRICE_SNAPSHOT.brentDate} ${PRICE_SNAPSHOT.brentSource}`;
 }
@@ -183,6 +183,6 @@ function initLiveControls(){
 updateDateLabels();
 syncDerivedState();
 recomputeSimulation();
-setStatus('Calibrated to the Apr 5/6, 2026 snapshot. 27,000 seeded regime-switching paths ready.');
+setStatus('Calibrated to the Apr 20, 2026 snapshot. 27,000 seeded regime-switching paths ready.');
 initLiveControls();
 })();
