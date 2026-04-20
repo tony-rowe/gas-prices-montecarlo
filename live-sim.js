@@ -8,11 +8,11 @@ function round3(v){return+Number(v).toFixed(3)}
 const NP=9000,DAYS=365,SNAP=[0,31,61,92,122,153,184,214,245,275,306,337,365],SNAP_SET=new Set(SNAP);
 const STORAGE_KEY='gas-prices-montecarlo.eia-key';
 const LIVE_SERIES=Object.freeze({brent:'PET.RBRTE.D',national:'PET.EMM_EPMR_PTE_NUS_DPG.W'});
-const BASELINE=Object.freeze({brent:111.14,brentDate:'Apr 6, 2026',brentSource:'futures snapshot',national:4.110,nationalDate:'Apr 5, 2026',nationalSource:'AAA snapshot',oregon:4.988,eugene:4.931});
+const BASELINE=Object.freeze({brent:111.14,brentDate:'Apr 20, 2026',brentSource:'futures snapshot',national:4.110,nationalDate:'Apr 20, 2026',nationalSource:'AAA snapshot',oregon:4.988,eugene:4.931});
 const BASELINE_PREMIUMS=Object.freeze({oregon:round3(BASELINE.oregon-BASELINE.national),eugene:round3(BASELINE.eugene-BASELINE.national),florenceOverEugene:0.49});
 
 let BRENT0=BASELINE.brent;
-let START=new Date('2026-04-06T00:00:00');
+let START=new Date('2026-04-20T00:00:00');
 let DATE_LABELS=[];
 let FLORENCE_CURRENT=0;
 let FIXED=0;
